@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Editor.Engine.Interfaces;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
-namespace Editor
+namespace Editor.Engine
 {
-    internal class Level
+    internal class Level : ISerializable
     {
         // Accessors
         public Camera GetCamera() { return m_camera; }
@@ -20,7 +22,7 @@ namespace Editor
 
         public void LoadContent(ContentManager _content)
         {
-            Models teapot = new(_content.Load<Model>("obj/Teapot"), _content.Load<Texture>("Metal"), Vector3.Zero, 1.0f);
+            Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 1.0f);
             teapot.SetShader(_content.Load<Effect>("MyShader"));
             AddModel(teapot);
         }
@@ -38,5 +40,26 @@ namespace Editor
             }
         }
 
+        public void Serialize(BinaryWriter _stream)
+        {
+            _stream.Write(m_models.Count);
+            foreach (var model in m_models)
+            {
+                model.Serialize(_stream);
+            }
+            m_camera.Serialize(_stream);
+        }
+
+        public void Deserialize(BinaryReader _stream, ContentManager _content)
+        {
+            int modelCount = _stream.ReadInt32();
+            for (int count = 0; count < modelCount; count++) 
+            {
+                Models m = new();
+                m.Deserialize(_stream, _content);
+                m_models.Add(m);
+            }
+            m_camera.Deserialize(_stream, _content);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Editor
+﻿namespace GUI.Editor
 {
     partial class FormEditor
     {
@@ -31,14 +31,14 @@
             menuStrip1 = new System.Windows.Forms.MenuStrip();
             fileToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            splitContainer = new System.Windows.Forms.SplitContainer();
-            statusStrip1 = new System.Windows.Forms.StatusStrip();
-            toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             projectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             createToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             loadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            splitContainer = new System.Windows.Forms.SplitContainer();
+            statusStrip1 = new System.Windows.Forms.StatusStrip();
+            toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer).BeginInit();
             splitContainer.SuspendLayout();
@@ -68,6 +68,34 @@
             exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
+            // 
+            // projectToolStripMenuItem
+            // 
+            projectToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { createToolStripMenuItem, saveToolStripMenuItem, loadToolStripMenuItem });
+            projectToolStripMenuItem.Name = "projectToolStripMenuItem";
+            projectToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            projectToolStripMenuItem.Text = "Project";
+            // 
+            // createToolStripMenuItem
+            // 
+            createToolStripMenuItem.Name = "createToolStripMenuItem";
+            createToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            createToolStripMenuItem.Text = "Create";
+            createToolStripMenuItem.Click += createToolStripMenuItem_Click;
+            // 
+            // saveToolStripMenuItem
+            // 
+            saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            saveToolStripMenuItem.Text = "Save";
+            saveToolStripMenuItem.Click += saveToolStripMenuItem_Click;
+            // 
+            // loadToolStripMenuItem
+            // 
+            loadToolStripMenuItem.Name = "loadToolStripMenuItem";
+            loadToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            loadToolStripMenuItem.Text = "Load";
+            loadToolStripMenuItem.Click += loadToolStripMenuItem_Click;
             // 
             // fileToolStripMenuItem
             // 
@@ -106,32 +134,6 @@
             toolStripStatusLabel1.Name = "toolStripStatusLabel1";
             toolStripStatusLabel1.Size = new System.Drawing.Size(69, 20);
             toolStripStatusLabel1.Text = "ToolStrip";
-            // 
-            // projectToolStripMenuItem
-            // 
-            projectToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { createToolStripMenuItem, saveToolStripMenuItem, loadToolStripMenuItem });
-            projectToolStripMenuItem.Name = "projectToolStripMenuItem";
-            projectToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            projectToolStripMenuItem.Text = "Project";
-            // 
-            // createToolStripMenuItem
-            // 
-            createToolStripMenuItem.Name = "createToolStripMenuItem";
-            createToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            createToolStripMenuItem.Text = "Create";
-            createToolStripMenuItem.Click += createToolStripMenuItem_Click;
-            // 
-            // saveToolStripMenuItem
-            // 
-            saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            saveToolStripMenuItem.Text = "Save";
-            // 
-            // loadToolStripMenuItem
-            // 
-            loadToolStripMenuItem.Name = "loadToolStripMenuItem";
-            loadToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            loadToolStripMenuItem.Text = "Load";
             // 
             // FormEditor
             // 

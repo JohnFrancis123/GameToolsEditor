@@ -3,13 +3,15 @@
 //using System.Linq;
 //using System.Text;
 //using System.Threading.Tasks;
-
+using Editor.Engine.Interfaces;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.IO;
 
-namespace Editor
+namespace Editor.Engine
 {
-    class Models
+    class Models : ISerializable
     {
         // Accessors
         public Model Mesh { get; set; }
@@ -24,10 +26,24 @@ namespace Editor
         private Vector3 m_position;
         private Vector3 m_rotation;
 
-        public Models(Model _model, Texture _texture, Vector3 _position, float _scale)
+        public Models()
         {
-            Mesh = _model;
-            Texture = _texture;
+        }
+
+        public Models(ContentManager _content, string _model, string _texture, string _effect, Vector3 _position, float _scale)
+        {
+            Create(_content, _model, _texture, _effect, _position, _scale);
+        }
+
+        public void Create(ContentManager _content, string _model, string _texture, string _effect, Vector3 _position, float _scale) 
+        {
+            Mesh = _content.Load<Model>(_model);
+            Mesh.Tag = _model;
+            Texture = _content.Load<Texture>(_texture);
+            Texture.Tag = _texture;
+            Shader = _content.Load<Effect>(_effect);
+            Shader.Tag = _effect;
+            SetShader(Shader);
             m_position = _position;
             Scale = _scale;
         }
@@ -65,6 +81,27 @@ namespace Editor
             {
                 mesh.Draw();
             }
+        }
+
+        public void Serialize(BinaryWriter _stream)
+        {
+            _stream.Write(Mesh.Tag.ToString());
+            _stream.Write(Texture.Tag.ToString());
+            _stream.Write(Shader.Tag.ToString());
+            HelpSerialize.Vec3(_stream, Position);
+            HelpSerialize.Vec3(_stream, Rotation);
+            _stream.Write(Scale);
+        }
+
+        public void Deserialize(BinaryReader _stream, ContentManager _content) 
+        { 
+            string mesh = _stream.ReadString();
+            string texture = _stream.ReadString();
+            string shader = _stream.ReadString();
+            Position = HelpDeserialize.Vec3(_stream);
+            Rotation = HelpDeserialize.Vec3(_stream);
+            Scale = _stream.ReadSingle();
+            Create(_content, mesh, texture, shader, Position, Scale);
         }
     }
 }
