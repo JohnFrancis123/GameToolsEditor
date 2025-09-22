@@ -81,7 +81,7 @@
             // 
             splitContainer.Panel1.Paint += splitContainer1_Panel1_Paint;
             splitContainer.Size = new System.Drawing.Size(800, 422);
-            splitContainer.SplitterDistance = 266;
+            splitContainer.SplitterDistance = 532;
             splitContainer.TabIndex = 2;
             // 
             // statusStrip1
