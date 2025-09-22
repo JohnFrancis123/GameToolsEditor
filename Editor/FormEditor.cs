@@ -42,5 +42,28 @@ namespace Editor
         {
             Game.Exit();
         }
+
+        private void FormEditor_SizeChanged(object sender, EventArgs e)
+        {
+            if (Game == null) return;
+            Game.AdjustAspectRatio();
+        }
+
+        private void splitContainer_SizeChanged(object sender, EventArgs e)
+        {
+            if (Game == null) return;
+            Game.AdjustAspectRatio();
+        }
+
+        private void splitContainer_Panel1_SizeChanged(object sender, EventArgs e)
+        {
+            if (Game == null) return;
+            Game.AdjustAspectRatio();
+        }
+
+        private void splitContainer_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+
+        }
     }
 }

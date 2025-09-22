@@ -47,7 +47,7 @@
             menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { fileToolStripMenuItem1 });
             menuStrip1.Location = new System.Drawing.Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new System.Drawing.Size(800, 28);
+            menuStrip1.Size = new System.Drawing.Size(1051, 28);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -79,18 +79,21 @@
             // 
             // splitContainer.Panel1
             // 
+            splitContainer.Panel1.SizeChanged += splitContainer_Panel1_SizeChanged;
             splitContainer.Panel1.Paint += splitContainer1_Panel1_Paint;
-            splitContainer.Size = new System.Drawing.Size(800, 422);
-            splitContainer.SplitterDistance = 532;
+            splitContainer.Size = new System.Drawing.Size(1051, 457);
+            splitContainer.SplitterDistance = 790;
             splitContainer.TabIndex = 2;
+            splitContainer.SplitterMoved += splitContainer_SplitterMoved;
+            splitContainer.SizeChanged += splitContainer_SizeChanged;
             // 
             // statusStrip1
             // 
             statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { toolStripStatusLabel1 });
-            statusStrip1.Location = new System.Drawing.Point(0, 424);
+            statusStrip1.Location = new System.Drawing.Point(0, 459);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new System.Drawing.Size(800, 26);
+            statusStrip1.Size = new System.Drawing.Size(1051, 26);
             statusStrip1.TabIndex = 3;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -104,7 +107,7 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(800, 450);
+            ClientSize = new System.Drawing.Size(1051, 485);
             Controls.Add(statusStrip1);
             Controls.Add(splitContainer);
             Controls.Add(menuStrip1);
@@ -112,6 +115,7 @@
             Name = "FormEditor";
             Text = "FormEditor";
             Load += FormEditor_Load;
+            SizeChanged += FormEditor_SizeChanged;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer).EndInit();

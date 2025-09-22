@@ -56,5 +56,11 @@ namespace Editor
 
             base.Draw(gameTime);
         }
+
+        public void AdjustAspectRatio()
+        {
+            Camera c = m_level.GetCamera();
+            c.Update(c.Position, m_graphics.GraphicsDevice.Viewport.AspectRatio);
+        }
     }
 }
