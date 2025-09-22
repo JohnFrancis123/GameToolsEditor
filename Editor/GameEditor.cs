@@ -9,6 +9,10 @@ namespace Editor
     {
         private GraphicsDeviceManager m_graphics;
         private FormEditor m_parent;
+        private Camera m_camera;
+        private Models m_teapot;
+        private Effect m_myShader;
+        private Texture m_metalTexture;
 
         public GameEditor()
         {
@@ -29,11 +33,16 @@ namespace Editor
 
         protected override void Initialize()
         {
+            m_camera = new Camera(new Vector3(0, 1, 1), m_graphics.GraphicsDevice.Viewport.AspectRatio);
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
+            m_myShader = Content.Load<Effect>("MyShader");
+            m_metalTexture = Content.Load<Texture>("Metal");
+            m_teapot = new Models(Content.Load<Model>("obj/Teapot"), m_metalTexture, Vector3.Zero, 1);
+            m_teapot.SetShader(m_myShader);
         }
 
         protected override void Update(GameTime gameTime)
@@ -44,6 +53,8 @@ namespace Editor
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            m_teapot.Render(m_camera.View, m_camera.Projection);
 
             base.Draw(gameTime);
         }
