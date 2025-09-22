@@ -34,6 +34,10 @@ namespace Editor
         protected override void Initialize()
         {
             m_camera = new Camera(new Vector3(0, 1, 1), m_graphics.GraphicsDevice.Viewport.AspectRatio);
+            RasterizerState state = new RasterizerState();
+            state.CullMode = CullMode.None;
+            GraphicsDevice.RasterizerState = state;
+
             base.Initialize();
         }
 
