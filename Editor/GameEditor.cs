@@ -9,10 +9,7 @@ namespace Editor
     {
         private GraphicsDeviceManager m_graphics;
         private FormEditor m_parent;
-        private Camera m_camera;
-        private Models m_teapot;
-        private Effect m_myShader;
-        private Texture m_metalTexture;
+        private Level m_level;
 
         public GameEditor()
         {
@@ -33,7 +30,6 @@ namespace Editor
 
         protected override void Initialize()
         {
-            m_camera = new Camera(new Vector3(0, 1, 1), m_graphics.GraphicsDevice.Viewport.AspectRatio);
             RasterizerState state = new RasterizerState();
             state.CullMode = CullMode.None;
             GraphicsDevice.RasterizerState = state;
@@ -43,10 +39,8 @@ namespace Editor
 
         protected override void LoadContent()
         {
-            m_myShader = Content.Load<Effect>("MyShader");
-            m_metalTexture = Content.Load<Texture>("Metal");
-            m_teapot = new Models(Content.Load<Model>("obj/Teapot"), m_metalTexture, Vector3.Zero, 1);
-            m_teapot.SetShader(m_myShader);
+            m_level = new();
+            m_level.LoadContent(Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -58,7 +52,7 @@ namespace Editor
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            m_teapot.Render(m_camera.View, m_camera.Projection);
+            m_level.Render();
 
             base.Draw(gameTime);
         }
