@@ -65,5 +65,16 @@ namespace Editor
         {
 
         }
+
+        private void createToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new();
+            if (sfd.ShowDialog() == DialogResult.OK) 
+            {
+                Game.Project = new(Game.Content, sfd.FileName);
+                Text = "Our Cool Editor - " + Game.Project.Name;
+                Game.AdjustAspectRatio();
+            }
+        }
     }
 }
