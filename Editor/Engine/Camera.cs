@@ -1,10 +1,9 @@
-﻿using Editor.Engine;
-using Editor.Engine.Interfaces;
+﻿using Editor.Engine.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using System.IO;
 
-namespace Editor
+namespace Editor.Engine
 {
     internal class Camera : ISerializable
     {

@@ -1,4 +1,4 @@
-﻿using Editor;
+﻿using Editor.Editor;
 using System;
 using System.IO;
 using System.Text;
@@ -73,7 +73,7 @@ namespace GUI.Editor //
             }
             saveToolStripMenuItem_Click(sender, e);
         }
-
+        //
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string fname = Path.Combine(Game.Project.Folder, Game.Project.Name);

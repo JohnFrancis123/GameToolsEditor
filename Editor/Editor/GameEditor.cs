@@ -1,11 +1,11 @@
-﻿using Editor.Editor;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Windows.Forms;
 using GUI.Editor;
+using Editor.Engine;
 
-namespace Editor
+namespace Editor.Editor
 {
     public class GameEditor : Game
     {

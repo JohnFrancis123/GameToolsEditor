@@ -7,29 +7,29 @@
 #define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
+matrix World;
 matrix WorldViewProjection;
-
-matrix World; // each matrix can be passed to one parameter
-matrix View;
-matrix Projection;
 
 texture Texture;
 sampler BasicTextureSampler = sampler_state
 {
     texture = <Texture>;
+    MinFilter = Anisotropic; // Minification Filter
+    MagFilter = Linear; // Magnification Filter
+    MipFilter = Linear; // Mip-mapping
+    AddressU = Wrap; // Address Mode for U Coordinates
+    AddressV = Wrap; // Address Mode for V Coordinates
 };
 
-struct VertexShaderInput //the types we will send to the shader
+struct VertexShaderInput
 {
     float4 Position : POSITION0;
     float2 UV : TEXCOORD0;
-	//float4 Color : COLOR0;
 };
 
-struct VertexShaderOutput //the types we will GET from the shader
+struct VertexShaderOutput
 {
     float4 Position : SV_POSITION;
-	//float4 Color : COLOR0;
     float2 UV : TEXCOORD0;
 };
 
@@ -39,16 +39,14 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 
     output.Position = mul(input.Position, WorldViewProjection);
     output.UV = input.UV;
-	//output.Color = input.Color;
 
     return output;
 }
 
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
-    float3 output = tex2D(BasicTextureSampler, input.UV);
-    return float4(output, 1);
-	//return input.Color;
+    float4 output = tex2D(BasicTextureSampler, input.UV);
+    return float4(output.rgb, 1);
 }
 
 technique BasicColorDrawing
