@@ -22,9 +22,9 @@ namespace Editor.Engine
 
         public void LoadContent(ContentManager _content)
         {
-            Models teapot = new(_content, "obj/Moon", "obj/MoonDiffuse", "MyShader", Vector3.Zero, 1.0f);
-            teapot.SetShader(_content.Load<Effect>("MyShader"));
-            AddModel(teapot);
+            Models sun = new(_content, "obj/world", "obj/worlddiffuse", "MyShader", Vector3.Zero, 2.0f);
+            sun.SetShader(_content.Load<Effect>("MyShader"));
+            AddModel(sun);
         }
 
         public void AddModel(Models _model)
