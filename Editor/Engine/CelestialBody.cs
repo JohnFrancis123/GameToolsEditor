@@ -15,7 +15,7 @@ namespace Editor.Engine
 
         public void Render()
         {
-
+            //
         }
     }
 }
