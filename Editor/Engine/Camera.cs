@@ -7,7 +7,7 @@ namespace Editor.Engine
 {
     internal class Camera : ISerializable
     {
-        public Vector3 Position { get; set; } = new Vector3(0, 0, 300.0f);
+        public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
         public Matrix View {  get; set; } = Matrix.Identity;
         public Matrix Projection { get; set; } = Matrix.Identity;
         public float NearPlane { get; set; } = 0.1f;

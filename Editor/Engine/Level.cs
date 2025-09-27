@@ -22,7 +22,7 @@ namespace Editor.Engine
 
         public void LoadContent(ContentManager _content)
         {
-            Models sun = new(_content, "obj/world", "obj/worlddiffuse", "MyShader", Vector3.Zero, 2.0f);
+            Models sun = new(_content, "obj/Sphere", "obj/worlddiffuse", "MyShader", Vector3.Zero, 2.0f);
             sun.SetShader(_content.Load<Effect>("MyShader"));
             AddModel(sun);
         }
