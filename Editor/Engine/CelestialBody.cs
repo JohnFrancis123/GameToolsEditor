@@ -76,84 +76,66 @@ namespace Editor.Engine
 
         private void CreateBody()
         {
-            Vector3 PosVector = Vector3.Zero; // The final position starts at (0, 0, 0)
-            float initialOrbitRadius = 0.0f; // Distance from parent
-            float initialAngle = 0.0f;      // Random start angle for separation
+            Vector3 PosVector = Vector3.Zero;
+            float initialAngle = 0.0f;
+            float fixedRad = 0.0f;
 
-            // Set speeds, scale, and initial positioning parameters
-            if (BodyType == 0) // Sun
+            if (BodyType == 0) //sun
             {
                 RotSpeed = 0.005f;
                 OrbitSpeed = 0.0f;
                 CelestialBodyModel.Scale = 2.0f;
-                // Position remains (0, 0, 0)
             }
-            else if (BodyType == 1) // Planet
+            else if (BodyType == 1) //planet
             {
                 RotSpeed = FRand(0.02f, 0.03f);
                 OrbitSpeed = FRand(0.001f, 0.002f);
                 CelestialBodyModel.Scale = 0.75f;
 
-                // Planet position is purely random within the bounds (not relative to parent position)
-                PosVector.X += FRand(-150.0f, 150.0f);
-                PosVector.Y += FRand(-90.0f, 90.0f);
-                PosVector.Z = 0.0f; // Assuming 0 for X-Y plane
+                //random X/Y position
+                PosVector.X = FRand(-150.0f, 150.0f);
+                PosVector.Y = FRand(-90.0f, 90.0f);
 
-                //CRITICAL FIX: Initializing the orbit angle(Rotation.X) randomly, so planets spawn properly.
-                float initAngle = FRand(0.0f, 2.0f * (float)Math.PI);
-                CelestialBodyModel.Rotation = new Vector3(
-                    initAngle,
-                    CelestialBodyModel.Rotation.Y, //preserving visual location 
-                    0.0f //preserving unused Z location
-                    );
+                //calculating the fixed radius and angle based on the random position
+                fixedRad = new Vector2(PosVector.X, PosVector.Y).Length();
+                initialAngle = (float)Math.Atan2(PosVector.Y, PosVector.X);
             }
-            else if (BodyType == 2) // Moon
+            else if (BodyType == 2) //moon
             {
                 RotSpeed = FRand(0.005f, 0.01f);
                 OrbitSpeed = FRand(0.01f, 0.02f);
                 CelestialBodyModel.Scale = FRand(0.2f, 0.4f);
 
-                // 1. Get parent's world position as the base
+                //calculating fixed radius and random angle (CRITICAL FIX for stacking)
+                fixedRad = FRand(5.0f, 15.0f);
+                initialAngle = FRand(0.0f, 2f * (float)Math.PI);
 
-                PosVector = ParentBodyModel.Position - ParentBodyModel.Rotation; // e.g., (100, 50, 0)
+                //setting PosVector to its final world position based on the calculated offset
+                if (ParentBodyModel != null)
+                {
+                    //NOTE: ParentBodyModel.Position is used here as a placeholder for the parent's current world pos.
+                    PosVector = ParentBodyModel.Position;
+                }
+                //trigonometric math to get the 
+                float offsetX = fixedRad * (float)Math.Cos(initialAngle);
+                float offsetY = fixedRad * (float)Math.Sin(initialAngle);
 
-                // 2. Calculate random orbital parameters (Crucial for non-stacking)
-                initialOrbitRadius = FRand(5.0f, 15.0f); // Random distance from planet
-                initialAngle = FRand(0.0f, 2f * (float)Math.PI); // Full 360-degree angle (THE FIX)
-
-                // 3. Calculate the offset based on the random angle
-                float offsetX = initialOrbitRadius * (float)Math.Cos(initialAngle);
-                float offsetY = initialOrbitRadius * (float)Math.Sin(initialAngle);
-
-                // 4. Apply the offset to the parent's position
                 PosVector.X += offsetX;
                 PosVector.Y += offsetY;
-                // PosVector.Z remains parent's Z (likely 0)
+            }
 
-                // 5. Store the starting angle for the Orbit() method to use (THE FIX)
+            //storing orbital state and setting final orbit position
+            if (BodyType != 0)
+            {
+                //storing orbital angle (Rotation.X) and fixed radius (Rotation.Z)
                 CelestialBodyModel.Rotation = new Vector3(
                     initialAngle,
-                    CelestialBodyModel.Rotation.Y,
-                    CelestialBodyModel.Rotation.Z
+                    //CelestialBodyModel.Rotation.Y,
+                    0.0f,
+                    fixedRad // <--- Fixed Orbital Radius
                 );
             }
 
-            // 2. Final Position Calculation (Only for Moons now, as Planets are done above)
-            if (BodyType == 2 && initialOrbitRadius > 0.0f)
-            {
-                // Calculate the initial offset in X-Y plane (relative to parent)
-                float offsetX = initialOrbitRadius * (float)Math.Cos(initialAngle);
-                float offsetY = initialOrbitRadius * (float)Math.Sin(initialAngle);
-
-                // Add the offset to the parent's base position (which is PosVector)
-                PosVector.X += offsetX;
-                PosVector.Y += offsetY;
-
-                // Store the starting angle for the Orbit() method to use
-                CelestialBodyModel.Rotation = new Vector3(initialAngle, CelestialBodyModel.Rotation.Y, CelestialBodyModel.Rotation.Z);
-            }
-
-            // 3. Assign final position to the model
             CelestialBodyModel.Position = PosVector;
         }
         public void Render(Matrix _view,
@@ -161,7 +143,7 @@ namespace Editor.Engine
         {
             Vector3 currRot = CelestialBodyModel.Rotation;
             currRot.Y += RotSpeed;
-            CelestialBodyModel.Rotation = currRot;
+            CelestialBodyModel.Rotation = currRot; //updating the stored Y spin
 
             if(BodyType != 0) Orbit();
 
@@ -177,32 +159,45 @@ namespace Editor.Engine
 
         private void Orbit()
         {
-            //getting our positions
-            Vector3 parentPos = new Vector3(0, 0, 0);
-            Vector3 currentPos = CelestialBodyModel.Position;
-            if (ParentBodyModel != null)
+            //retrieving the orbital state
+            float angle = CelestialBodyModel.Rotation.X; //current orbital angle
+            float rad = CelestialBodyModel.Rotation.Z;   //fixed orbital radius
+
+            float currYSpin = CelestialBodyModel.Rotation.Y;
+
+            //fallback if radius was not initialized (for first frame stability)
+            if (rad == 0.0f && ParentBodyModel != null)
             {
-                parentPos = ParentBodyModel.Position;
+                rad = new Vector2(CelestialBodyModel.Position.X - ParentBodyModel.Position.X,
+                                  CelestialBodyModel.Position.Y - ParentBodyModel.Position.Y).Length();
+
+                //storing the calculated radius back into Rotation.Z
+                CelestialBodyModel.Rotation = new Vector3(angle, CelestialBodyModel.Rotation.Y, rad);
             }
 
-            //getting the angle to update based on speed (radians)
-            float angle = CelestialBodyModel.Rotation.X;
-            //angle += OrbitSpeed;
-
-            //getting the fixed orbital radius as distance scalar
-            float rad = new Vector2(currentPos.X - parentPos.X, currentPos.Y - parentPos.Y).Length();
-
+            //updating orbital angle
             angle += OrbitSpeed;
 
-            //getting the new position using trigonometry
-            float newX = parentPos.X + rad * (float)Math.Cos(angle);
-            float newY = parentPos.Y + rad * (float)Math.Sin(angle);
+            //matrix transformation
 
-            //updating the position and stored orbital angle for the next frame
-            CelestialBodyModel.Position = new Vector3(newX, newY, 0);
-            CelestialBodyModel.Rotation = new Vector3(angle, CelestialBodyModel.Rotation.Y, CelestialBodyModel.Rotation.Z);
+            //local translation matrix: Moves the body out by its fixed radius (rad, 0, 0)
+            //this defines the body's fixed distance *from* its orbital center.
+            Matrix translation = Matrix.CreateTranslation(rad, 0, 0);
+
+            //orbital rotation matrix: Rotates the body around the Z-axis by the current angle
+            //this defines the body's position *on* the orbit circle.
+            Matrix orbitalRotation = Matrix.CreateRotationZ(angle);
+
+            //world matrix: World = Translation * OrbitalRotation * ParentPositionMatrix
+            //we compute the body's position relative to the origin, then shift the entire orbit to the parent's position.
+            Matrix currentWorld = translation * orbitalRotation * Matrix.CreateTranslation(ParentBodyModel.Position);
+
+            //storing the updated world position (for rendering/next frame parent reference)
+            CelestialBodyModel.Position = currentWorld.Translation;
+
+            //storing the updated orbital angle for the next frame
+            CelestialBodyModel.Rotation = new Vector3(angle, currYSpin, rad);
         }
-
         public void Serialize(BinaryWriter _stream)
         {
             CelestialBodyModel.Serialize(_stream);
