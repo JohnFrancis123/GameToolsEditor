@@ -97,7 +97,8 @@ namespace Editor.Engine
                 //visual corruption is still present in Models.GetTransform(), but this ensures
                 //the static values are set for the Orbit() function to use.
                 CelestialBodyModel.Rotation = new Vector3(
-                    CelestialBodyModel.Rotation.X,
+                    //CelestialBodyModel.Rotation.X,
+                    initialAngle,
                     CelestialBodyModel.Rotation.Y, // Which is 0.0f
                     fixedRad // <--- Fixed Orbital Radius
                     //0.0f
@@ -184,6 +185,7 @@ namespace Editor.Engine
             //we are forced to keep the initial angle in Rotation.X to maintain the orbit state for the next frame's read.
             CelestialBodyModel.Rotation = new Vector3(angle, currYSpin, rad);
         }
+
         public void Serialize(BinaryWriter _stream)
         {
             CelestialBodyModel.Serialize(_stream);

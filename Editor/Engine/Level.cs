@@ -56,13 +56,14 @@ namespace Editor.Engine
         public void AddWorld(ContentManager _content)
         {
             Models world = new(_content, "obj/World", "obj/WorldDiffuse", "MyShader", Vector3.Zero, 1.0f);
-            
+
             Models parent = new();
             world.SetShader(_content.Load<Effect>("MyShader"));
 
             int c = m_bodies.Count;
 
-            for (int a = 0; a < c; a++) { //if we wanna make it impossible to make a world body without a sun. Completely optional.
+            for (int a = 0; a < c; a++)
+            { //if we wanna make it impossible to make a world body without a sun. Completely optional.
                 if (m_bodies[a].BodyType == 0)
                 {
                     parent = m_bodies[a].CelestialBodyModel;
@@ -80,12 +81,8 @@ namespace Editor.Engine
 
         public void AddMoon(ContentManager _content)
         {
-            Models moon = new(_content, "obj/moon", "obj/MoonDiffuse", "MyShader", Vector3.Zero, 1.0f);
-            moon.SetShader(_content.Load<Effect>("MyShader"));
             Models parent = new();
-
             int c = m_bodies.Count;
-
             List<int> indices = new List<int>();
 
             for (int a = 0; a < c; a++)
@@ -98,12 +95,14 @@ namespace Editor.Engine
 
             for (int i = 0; i < indices.Count; i++)
             {
+                Models moon = new(_content, "obj/moon", "obj/MoonDiffuse", "MyShader", Vector3.Zero, 1.0f);
+                moon.SetShader(_content.Load<Effect>("MyShader"));
+
                 parent = m_bodies[indices[i]].CelestialBodyModel;
 
                 CelestialBody body = new CelestialBody(moon, 2, parent);
                 body.CreateBody();
                 AddBody(body);
-                
             }
         }
 
@@ -178,6 +177,9 @@ namespace Editor.Engine
                     }
                 }
 
+                // 1. **FIX: Save the correct Rotation state before corruption.**
+                Vector3 originalRotation = body.CelestialBodyModel.Rotation;
+
                 //temporarily storing the parent index in a property the body serializes.
                 //the CelestialBody.Serialize method will read this and write it to the stream.
                 body.CelestialBodyModel.Rotation = new Vector3(
@@ -189,12 +191,14 @@ namespace Editor.Engine
                 //serializing the body (which now writes the parent index)
                 body.Serialize(_stream);
 
-                //restor the rotation angle after serialization
-                body.CelestialBodyModel.Rotation = new Vector3(
-                    body.CelestialBodyModel.Rotation.X,
-                    body.CelestialBodyModel.Rotation.Y,
-                    body.CelestialBodyModel.Rotation.Z
-                );
+                // 2. **FIX: Restore the correct Rotation state immediately.**
+                body.CelestialBodyModel.Rotation = originalRotation;
+
+                // 3. **FIX: Explicitly write the correct Rotation vector to the stream.**
+                // This data will be used in Deserialize to correct the model's rotation.
+                _stream.Write(originalRotation.X);
+                _stream.Write(originalRotation.Y);
+                _stream.Write(originalRotation.Z);
             }
 
             m_camera.Serialize(_stream);
@@ -215,7 +219,18 @@ namespace Editor.Engine
                 CelestialBody c = new();
 
                 //the modified Deserialize returns the parent index, which we capture.
+                //NOTE: c.CelestialBodyModel.Rotation.X is now corrupted (contains the index float).
                 int parentIndex = c.Deserialize(_stream, _content);
+
+                // 4. **FIX: Read the correct rotation vector from the stream.**
+                Vector3 correctRotation = new Vector3(
+                    _stream.ReadSingle(),
+                    _stream.ReadSingle(),
+                    _stream.ReadSingle()
+                );
+
+                // 5. **FIX: Overwrite the corrupted rotation with the correct, saved vector.**
+                c.CelestialBodyModel.Rotation = correctRotation;
 
                 m_bodies.Add(c);
                 parentIndices.Add(parentIndex);
