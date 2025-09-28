@@ -35,7 +35,7 @@ namespace Editor.Engine
             sun.SetShader(_content.Load<Effect>("MyShader"));
 
             CelestialBody body = new CelestialBody(sun, 0);
-
+            body.CreateBody();
             AddBody(body);
         }
         //int i = 0;
@@ -68,7 +68,7 @@ namespace Editor.Engine
                     parent = m_bodies[a].CelestialBodyModel;
 
                     CelestialBody body = new CelestialBody(world, 1, parent);
-
+                    body.CreateBody();
                     AddBody(body);
                     return;
                 }
@@ -101,7 +101,7 @@ namespace Editor.Engine
                 parent = m_bodies[indices[i]].CelestialBodyModel;
 
                 CelestialBody body = new CelestialBody(moon, 2, parent);
-
+                body.CreateBody();
                 AddBody(body);
                 
             }
@@ -154,40 +154,88 @@ namespace Editor.Engine
 
         public void Serialize(BinaryWriter _stream)
         {
-            //_stream.Write(m_models.Count);
-            //foreach (var model in m_models)
-            //{
-            //    model.Serialize(_stream);
-            //}
-
             _stream.Write(m_bodies.Count);
-            foreach (var body in m_bodies)
+
+            //pass 1: serializing body data and parent index
+            for (int i = 0; i < m_bodies.Count; i++)
             {
+                var body = m_bodies[i];
+
+                //before serializing, finding the parent's index if one exists.
+                int parentIndex = -1;
+                if (body.ParentBodyModel != null)
+                {
+                    //finding the index of the parent in the m_bodies list.
+                    //this is the core of the hierarchy serialization logic.
+                    for (int p = 0; p < m_bodies.Count; p++)
+                    {
+                        //CRITICAL CHECK: Looking up the parent object by its Model reference.
+                        if (m_bodies[p].CelestialBodyModel == body.ParentBodyModel)
+                        {
+                            parentIndex = p;
+                            break;
+                        }
+                    }
+                }
+
+                //temporarily storing the parent index in a property the body serializes.
+                //the CelestialBody.Serialize method will read this and write it to the stream.
+                body.CelestialBodyModel.Rotation = new Vector3(
+                    (float)parentIndex, //parent Index is cast to float and stored in Rotation.X
+                    body.CelestialBodyModel.Rotation.Y,
+                    body.CelestialBodyModel.Rotation.Z
+                );
+
+                //serializing the body (which now writes the parent index)
                 body.Serialize(_stream);
+
+                //restor the rotation angle after serialization
+                body.CelestialBodyModel.Rotation = new Vector3(
+                    body.CelestialBodyModel.Rotation.X,
+                    body.CelestialBodyModel.Rotation.Y,
+                    body.CelestialBodyModel.Rotation.Z
+                );
             }
 
             m_camera.Serialize(_stream);
         }
 
+        // In Level.cs
+
         public void Deserialize(BinaryReader _stream, ContentManager _content)
         {
-            //int modelCount = _stream.ReadInt32();
-            //for (int count = 0; count < modelCount; count++) 
-            //{
-            //    Models m = new();
-            //    m.Deserialize(_stream, _content);
-            //    m_models.Add(m);
-            //}
+            m_bodies.Clear(); //clearing any existing bodies
+            List<int> parentIndices = new(); //temporary list to store parent indices
 
             int bodyCount = _stream.ReadInt32();
-            for (int count = 0; count < bodyCount; count++)
+
+            //PASS 1: Loading all bodies and capturing parent indices
+            for (int i = 0; i < bodyCount; i++)
             {
                 CelestialBody c = new();
-                c.Deserialize(_stream, _content);
-                m_bodies.Add(c);
-            }
-            m_camera.Deserialize(_stream, _content);
 
+                //the modified Deserialize returns the parent index, which we capture.
+                int parentIndex = c.Deserialize(_stream, _content);
+
+                m_bodies.Add(c);
+                parentIndices.Add(parentIndex);
+            }
+
+            //PASS 2: reconnecting the hierarchy
+            for (int i = 0; i < m_bodies.Count; i++)
+            {
+                int parentIndex = parentIndices[i];
+
+                if (parentIndex != -1)
+                {
+                    //CRITICAL RECONNECTION: 
+                    //the body's ParentBodyModel must point to the live CelestialBodyModel 
+                    //property of the loaded parent object.
+                    m_bodies[i].ParentBodyModel = m_bodies[parentIndex].CelestialBodyModel;
+                }
+            }
+
+            m_camera.Deserialize(_stream, _content);
         }
     }
 }

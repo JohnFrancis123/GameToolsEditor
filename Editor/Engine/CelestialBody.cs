@@ -35,11 +35,11 @@ namespace Editor.Engine
             CelestialBodyModel = _celestialBodyModel;
             BodyType = _bodyType;
 
-            CreateBody();
+            //CreateBody();
         }
 
 
-        private void CreateBody()
+        public void CreateBody()
         {
             Vector3 PosVector = Vector3.Zero;
             float initialAngle = 0.0f;
@@ -191,31 +191,34 @@ namespace Editor.Engine
             bool hasParent = ParentBodyModel != null;
             _stream.Write(hasParent);
 
-            
             if (hasParent)
             {
-                ParentBodyModel.Serialize(_stream);
+                //using the CelestialBodyModel's Rotation.X property to store 
+                //the Parent's index just before serializing the body.
+                //this MUST be set by the Level class before calling Serialize.
+                _stream.Write((int)CelestialBodyModel.Rotation.X);
             }
 
             _stream.Write(RotSpeed);
             _stream.Write(OrbitSpeed);
-
             _stream.Write(BodyType);
         }
 
-        public void Deserialize(BinaryReader _stream, ContentManager _content)
+        public int Deserialize(BinaryReader _stream, ContentManager _content)
         {
             Models m = new();
             m.Deserialize(_stream, _content);
             CelestialBodyModel = m;
 
+            int parentIndex = -1; //defaulting to -1 (no parent)
+
             bool hasParent = _stream.ReadBoolean();
 
             if (hasParent)
             {
-                Models n = new();
-                n.Deserialize(_stream, _content);
-                ParentBodyModel = n;
+                //reading the saved parent index
+                parentIndex = _stream.ReadInt32();
+                ParentBodyModel = null; //essential: Starts unlinked
             }
             else
             {
@@ -224,8 +227,9 @@ namespace Editor.Engine
 
             RotSpeed = _stream.ReadSingle();
             OrbitSpeed = _stream.ReadSingle();
-
             BodyType = _stream.ReadByte();
+
+            return parentIndex; //returning the Parent Index for the Level class to use
         }
     }
 }
