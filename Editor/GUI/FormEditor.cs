@@ -3,11 +3,14 @@ using System;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using Editor.Engine;
 
 namespace GUI.Editor //
 {
     public partial class FormEditor : Form
     {
+
+        private Level CurrentLevel => Game.Project.CurrentLevel;
         public GameEditor Game { get; set; }
         public FormEditor()
         {
@@ -99,17 +102,23 @@ namespace GUI.Editor //
 
         private void addSunToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (Game?.Project?.CurrentLevel == null) return; //returning if we never actually loaded in a level
+            var content = Game.Content;
+            CurrentLevel.AddSun(content);
         }
 
         private void addPlanetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (Game?.Project?.CurrentLevel == null) return; //returning if we never actually loaded in a level
+            var content = Game.Content;
+            CurrentLevel.AddWorld(content);
         }
 
         private void addMoonToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (Game?.Project?.CurrentLevel == null) return; //returning if we never actually loaded in a level
+            var content = Game.Content;
+            CurrentLevel.AddMoon(content);
         }
     }
 }
