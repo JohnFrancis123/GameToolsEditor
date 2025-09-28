@@ -113,20 +113,20 @@ namespace Editor.Engine
 
         public void LoadContent(ContentManager _content)
         {
-            Models sun = new(_content, "obj/Sphere", "obj/worlddiffuse", "MyShader", Vector3.Zero, 2.0f);
-            sun.SetShader(_content.Load<Effect>("MyShader"));
+            //Models sun = new(_content, "obj/Sphere", "obj/worlddiffuse", "MyShader", Vector3.Zero, 2.0f);
+            //sun.SetShader(_content.Load<Effect>("MyShader"));
 
-            CelestialBody body;
+            //CelestialBody body;
 
-            for (int a = 0; a < m_bodies.Count; a++)
-            { //if we wanna make it impossible to make a world body without a sun. Completely optional.
-                if (m_bodies[a].BodyType == 1)
-                {
-                    body = new CelestialBody(sun, 2, m_bodies[a].CelestialBodyModel);
+            //for (int a = 0; a < m_bodies.Count; a++)
+            //{ //if we wanna make it impossible to make a world body without a sun. Completely optional.
+            //    if (m_bodies[a].BodyType == 1)
+            //    {
+            //        body = new CelestialBody(sun, 2, m_bodies[a].CelestialBodyModel);
 
-                    AddBody(body);
-                }
-            }
+            //        AddBody(body);
+            //    }
+            //}
             //AddModel(sun);
         }
 

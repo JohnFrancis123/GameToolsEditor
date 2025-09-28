@@ -31,10 +31,17 @@ namespace Editor.Engine
 
         public CelestialBody(Models _celestialBodyModel, byte _bodyType, Models _parentBodyModel = null)
         {
-            CelestialBodyModel = _celestialBodyModel;
-            BodyType = _bodyType;
+            ParentBodyModel = _parentBodyModel;
 
             Vector3 PosVector = new Vector3(0, 0, 0);
+
+            CelestialBodyModel = _celestialBodyModel;
+            if(ParentBodyModel != null)
+                PosVector = ParentBodyModel.Position;
+
+            BodyType = _bodyType;
+
+
 
             if (BodyType == 0)
             {
@@ -51,9 +58,8 @@ namespace Editor.Engine
                 PosVector.X = FRand(-150.0f, 150.0f);
                 PosVector.Y = FRand(-90.0f, 90.0f);
                 CelestialBodyModel.Scale = 0.75f;
-
             }
-            else if (BodyType == 3)
+            else if (BodyType == 2)
             {
                 RotSpeed = FRand(0.005f, 0.01f);
                 OrbitSpeed = FRand(0.01f, 0.02f);
@@ -65,6 +71,7 @@ namespace Editor.Engine
 
                 CelestialBodyModel.Scale = FRand(0.2f, 0.4f);
             }
+            CelestialBodyModel.Position = PosVector;
         }
 
         public void Render(Matrix _view,
@@ -99,17 +106,19 @@ namespace Editor.Engine
 
             //getting the angle to update based on speed (radians)
             float angle = CelestialBodyModel.Rotation.X;
-            angle += OrbitSpeed;
+            //angle += OrbitSpeed;
 
             //getting the fixed orbital radius as distance scalar
-            float rad = new Vector2(currentPos.X - parentPos.X, currentPos.Z - parentPos.Z).Length();
+            float rad = new Vector2(currentPos.X - parentPos.X, currentPos.Y - parentPos.Y).Length();
+
+            angle += OrbitSpeed;
 
             //getting the new position using trigonometry
             float newX = parentPos.X + rad * (float)Math.Cos(angle);
-            float newZ = parentPos.Z + rad * (float)Math.Sin(angle);
+            float newY = parentPos.Y + rad * (float)Math.Sin(angle);
 
             //updating the position and stored orbital angle for the next frame
-            CelestialBodyModel.Position = new Vector3(newX, currentPos.Y, newZ);
+            CelestialBodyModel.Position = new Vector3(newX, newY, 0);
             CelestialBodyModel.Rotation = new Vector3(angle, CelestialBodyModel.Rotation.Y, CelestialBodyModel.Rotation.Z);
         }
 
