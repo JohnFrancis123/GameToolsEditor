@@ -74,10 +74,7 @@ namespace Editor.Engine
             currRot.Y += RotSpeed;
             CelestialBodyModel.Rotation = currRot;
 
-            if (ParentBodyModel != null)
-            {
-                Orbit(ParentBodyModel.Position);
-            }
+            if(BodyType != 0) Orbit();
 
 
             CelestialBodyModel.Render(_view, _projection);
@@ -90,9 +87,30 @@ namespace Editor.Engine
             return (float)(min + (sample * range));
         }
 
-        private void Orbit(Vector3 _pos)
+        private void Orbit()
         {
+            //getting our positions
+            Vector3 parentPos = new Vector3(0, 0, 0);
+            Vector3 currentPos = CelestialBodyModel.Position;
+            if (ParentBodyModel != null)
+            {
+                parentPos = ParentBodyModel.Position;
+            }
 
+            //getting the angle to update based on speed (radians)
+            float angle = CelestialBodyModel.Rotation.X;
+            angle += OrbitSpeed;
+
+            //getting the fixed orbital radius as distance scalar
+            float rad = new Vector2(currentPos.X - parentPos.X, currentPos.Z - parentPos.Z).Length();
+
+            //getting the new position using trigonometry
+            float newX = parentPos.X + rad * (float)Math.Cos(angle);
+            float newZ = parentPos.Z + rad * (float)Math.Sin(angle);
+
+            //updating the position and stored orbital angle for the next frame
+            CelestialBodyModel.Position = new Vector3(newX, currentPos.Y, newZ);
+            CelestialBodyModel.Rotation = new Vector3(angle, CelestialBodyModel.Rotation.Y, CelestialBodyModel.Rotation.Z);
         }
 
         public void Serialize(BinaryWriter _stream)
