@@ -19,9 +19,7 @@ namespace Editor.Engine
         public float OrbitSpeed { get; set; }
 
         private Random m_rand = new Random();
-
         public Models ParentBodyModel { get; set; }
-        //public float Scale {  get; set; }
 
 
         public CelestialBody() 
@@ -34,14 +32,12 @@ namespace Editor.Engine
             ParentBodyModel = _parentBodyModel;
             CelestialBodyModel = _celestialBodyModel;
             BodyType = _bodyType;
-
-            //CreateBody();
         }
 
 
         public void CreateBody()
         {
-            Vector3 PosVector = Vector3.Zero;
+            Vector3 posVector = Vector3.Zero;
             float initialAngle = 0.0f;
             float fixedRad = 0.0f;
 
@@ -58,12 +54,12 @@ namespace Editor.Engine
                 CelestialBodyModel.Scale = 0.75f;
 
                 //random X/Y position
-                PosVector.X = FRand(-150.0f, 150.0f);
-                PosVector.Y = FRand(-90.0f, 90.0f);
+                posVector.X = FRand(-150.0f, 150.0f);
+                posVector.Y = FRand(-90.0f, 90.0f);
 
-                //calculating the fixed radius and angle based on the random position
-                fixedRad = new Vector2(PosVector.X, PosVector.Y).Length();
-                initialAngle = (float)Math.Atan2(PosVector.Y, PosVector.X);
+                //calculating the fixed radius and angle based on the random position in radians
+                fixedRad = new Vector2(posVector.X, posVector.Y).Length();
+                initialAngle = (float)Math.Atan2(posVector.Y, posVector.X);
             }
             else if (BodyType == 2) //moon
             {
@@ -71,76 +67,57 @@ namespace Editor.Engine
                 OrbitSpeed = FRand(0.01f, 0.02f);
                 CelestialBodyModel.Scale = FRand(0.2f, 0.4f);
 
-                //calculating fixed radius and random angle (CRITICAL FIX for stacking)
-                fixedRad = FRand(15.0f, 20.0f);
-                initialAngle = FRand(0.0f, 2f * (float)Math.PI);
+                //radius of 20 and angle of 0 gives us a position at (20, 0, 0).
+                fixedRad = 20.0f;
+                initialAngle = 0.0f;
+                
 
                 //setting PosVector to its final world position based on the calculated offset
-                if (ParentBodyModel != null)
-                {
-                    PosVector = ParentBodyModel.Position;
-                }
-                //trigonometric math to get the offset for positioning
-                float offsetX = fixedRad * (float)Math.Cos(initialAngle);
-                float offsetY = fixedRad * (float)Math.Sin(initialAngle);
-
-                PosVector.X += offsetX;
-                PosVector.Y += offsetY;
+                posVector = ParentBodyModel.Position;
             }
 
             //storing orbital state and setting final orbit position
             if (BodyType != 0)
             {
-                //ensuring initial VISUAL rotation is ZERO to prevent random orientation
-
-                //immediately setting the orbital parameters (X and Z) needed for orbit and position calculation
-                //visual corruption is still present in Models.GetTransform(), but this ensures
-                //the static values are set for the Orbit() function to use.
+                //sneaking the angle and radius into our Rotation vector for our Orbit function
                 CelestialBodyModel.Rotation = new Vector3(
-                    //CelestialBodyModel.Rotation.X,
-                    initialAngle,
-                    CelestialBodyModel.Rotation.Y, // Which is 0.0f
-                    fixedRad // <--- Fixed Orbital Radius
-                    //0.0f
+                    initialAngle, 
+                    0.0f,
+                    fixedRad // <--- Fixed Orbital Radius to save
                 );
             }
 
-            CelestialBodyModel.Position = PosVector;
+            CelestialBodyModel.Position = posVector;
         }
 
         public void Render(Matrix _view,
                            Matrix _projection)
         {
-            // 1. Update Local Spin (Y-axis)
+            //updating local spin on Y axis for rotation effect
             Vector3 currRot = CelestialBodyModel.Rotation;
             currRot.Y += RotSpeed;
 
-            // SAVE orbital state before corruption
-            float savedAngle = currRot.X; // NEW LINE 1
-            float savedRadius = currRot.Z; // NEW LINE 2
+            //saving orbital state in case of corruption (technically not needed when always zero, but just for safety)
+            float tempAngle = currRot.X; 
+            float tempRadius = currRot.Z; 
 
-            // HACK: Zero X and Z for rendering, allowing only the correct Y-spin to apply.
-            currRot.X = 0.0f; // NEW LINE 3
-            currRot.Z = 0.0f; // NEW LINE 4
+            //zeroing X and Z for rendering, allowing only the correct Y-spin to apply.
+            currRot.X = 0.0f; 
+            currRot.Z = 0.0f; 
 
-            CelestialBodyModel.Rotation = currRot; // Final rotation state for drawing
+            CelestialBodyModel.Rotation = currRot; //final rotation state for drawing
 
-            // 2. Render (Uses the cleaned Rotation vector)
+            //rendering using the cleaned Rotation vector
             CelestialBodyModel.Render(_view, _projection);
 
-            // 3. RESTORE orbital state for the next frame's Orbit() call
-            currRot.X = savedAngle; // NEW LINE 5
-            currRot.Z = savedRadius; // Exceeds 5 lines, so we must combine or move logic.
+            //restoring orbital state for the next frame's Orbit() call
+            currRot.X = tempAngle; 
+            currRot.Z = tempRadius;
 
-            // Combining the restoration:
-            // We update Rotation property with the restored orbital parameters
-            // while keeping the newly calculated Y-spin.
+            //saving the radius and angle for later
+            CelestialBodyModel.Rotation = new Vector3(tempAngle, currRot.Y, tempRadius); 
 
-            // COMBINED FIX (using only 5 new lines total)
-            // Restore Angle (X) and Radius (Z) for Orbit()
-            CelestialBodyModel.Rotation = new Vector3(savedAngle, currRot.Y, savedRadius); // NEW LINE 5 (Replaces previous 3 lines)
-
-            // 4. Perform Orbital Update (updates Position and Rotation.X/Z for next frame)
+            //performing the orbit using the angle and radius that we snuck into the Rotation vector
             if (BodyType != 0) Orbit();
         }
 
@@ -152,10 +129,14 @@ namespace Editor.Engine
 
         private void Orbit()
         {
-            //retrieving the orbital state
+
+            //retrieving our angle and radius from the Rotation values.
+            //rotation X and rotation Z are ALWAYS set to 0 during rendering.
+
             float angle = CelestialBodyModel.Rotation.X; //current orbital angle
             float rad = CelestialBodyModel.Rotation.Z;   //fixed orbital radius
 
+            //Y rotation gives us our Y spin.
             float currYSpin = CelestialBodyModel.Rotation.Y;
 
             //fallback if radius was not initialized (for first frame stability)
@@ -173,16 +154,14 @@ namespace Editor.Engine
 
             //matrix transformation
             Matrix translation = Matrix.CreateTranslation(rad, 0, 0);
-            Matrix orbitalRotation = Matrix.CreateRotationZ(angle);
+            Matrix orbitalRotation = Matrix.CreateRotationZ(angle); //rotation Z for our angle
+            //taking advantage of matrix math to rotate around a point
             Matrix currentWorld = translation * orbitalRotation * Matrix.CreateTranslation(ParentBodyModel.Position);
 
             //storing the updated world position (for rendering/next frame parent reference)
             CelestialBodyModel.Position = currentWorld.Translation;
 
-            //FIX: DO NOT WRITE THE ANGLE BACK TO Rotation.X. 
-            //instead, overwriting Rotation.X with the old value and let Render fix it.
-            //the only component we allow to change here is the position (above).
-            //we are forced to keep the initial angle in Rotation.X to maintain the orbit state for the next frame's read.
+            //updating the rotation of our celestial body.
             CelestialBodyModel.Rotation = new Vector3(angle, currYSpin, rad);
         }
 
@@ -197,7 +176,7 @@ namespace Editor.Engine
             {
                 //using the CelestialBodyModel's Rotation.X property to store 
                 //the Parent's index just before serializing the body.
-                //this MUST be set by the Level class before calling Serialize.
+                //this is set by the Level class before calling Serialize.
                 _stream.Write((int)CelestialBodyModel.Rotation.X);
             }
 

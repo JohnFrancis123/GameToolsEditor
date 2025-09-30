@@ -38,21 +38,7 @@ namespace Editor.Engine
             body.CreateBody();
             AddBody(body);
         }
-        //int i = 0;
 
-        //List<int> indices = new List<int>();
-
-        //for (int a = 0; a < m_bodies.Count; a++) 
-        //{
-        //    if (m_bodies[a].BodyType == 1)
-        //    {
-        //        i++;
-        //        indices.Add(a);
-        //    }
-        //}
-
-        //i = m_rand.Next(i);
-        //m_bodies[indicies[i]];
         public void AddWorld(ContentManager _content)
         {
             Models world = new(_content, "obj/World", "obj/WorldDiffuse", "MyShader", Vector3.Zero, 1.0f);
@@ -140,11 +126,6 @@ namespace Editor.Engine
 
         public void Render()
         {
-            //foreach (Models m in m_models)
-            //{
-            //    m.Render(m_camera.View, m_camera.Projection);
-            //}
-
             foreach (CelestialBody c in m_bodies)
             {
                 c.Render(m_camera.View, m_camera.Projection);
@@ -168,7 +149,7 @@ namespace Editor.Engine
                     //this is the core of the hierarchy serialization logic.
                     for (int p = 0; p < m_bodies.Count; p++)
                     {
-                        //CRITICAL CHECK: Looking up the parent object by its Model reference.
+                        //looking up the parent object by its Model reference.
                         if (m_bodies[p].CelestialBodyModel == body.ParentBodyModel)
                         {
                             parentIndex = p;
@@ -177,7 +158,7 @@ namespace Editor.Engine
                     }
                 }
 
-                // 1. **FIX: Save the correct Rotation state before corruption.**
+                //saving the correct Rotation state before corruption.
                 Vector3 originalRotation = body.CelestialBodyModel.Rotation;
 
                 //temporarily storing the parent index in a property the body serializes.
@@ -191,11 +172,11 @@ namespace Editor.Engine
                 //serializing the body (which now writes the parent index)
                 body.Serialize(_stream);
 
-                // 2. **FIX: Restore the correct Rotation state immediately.**
+                //restoring the correct Rotation state immediately.
                 body.CelestialBodyModel.Rotation = originalRotation;
 
-                // 3. **FIX: Explicitly write the correct Rotation vector to the stream.**
-                // This data will be used in Deserialize to correct the model's rotation.
+                //explicitly writing the correct Rotation vector to the stream.
+                //this data will be used in Deserialize to correct the model's rotation.
                 _stream.Write(originalRotation.X);
                 _stream.Write(originalRotation.Y);
                 _stream.Write(originalRotation.Z);
@@ -203,8 +184,6 @@ namespace Editor.Engine
 
             m_camera.Serialize(_stream);
         }
-
-        // In Level.cs
 
         public void Deserialize(BinaryReader _stream, ContentManager _content)
         {
@@ -222,14 +201,14 @@ namespace Editor.Engine
                 //NOTE: c.CelestialBodyModel.Rotation.X is now corrupted (contains the index float).
                 int parentIndex = c.Deserialize(_stream, _content);
 
-                // 4. **FIX: Read the correct rotation vector from the stream.**
+                //reading the correct rotation vector from the stream.**
                 Vector3 correctRotation = new Vector3(
                     _stream.ReadSingle(),
                     _stream.ReadSingle(),
                     _stream.ReadSingle()
                 );
 
-                // 5. **FIX: Overwrite the corrupted rotation with the correct, saved vector.**
+                //overwriting the corrupted rotation with the correct, saved vector.
                 c.CelestialBodyModel.Rotation = correctRotation;
 
                 m_bodies.Add(c);
@@ -243,7 +222,6 @@ namespace Editor.Engine
 
                 if (parentIndex != -1)
                 {
-                    //CRITICAL RECONNECTION: 
                     //the body's ParentBodyModel must point to the live CelestialBodyModel 
                     //property of the loaded parent object.
                     m_bodies[i].ParentBodyModel = m_bodies[parentIndex].CelestialBodyModel;
