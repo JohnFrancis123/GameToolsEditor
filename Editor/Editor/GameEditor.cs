@@ -2,7 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Windows.Forms;
+using Editor;
 using GUI.Editor;
+using System;
 using Editor.Engine;
 
 namespace Editor.Editor
@@ -13,6 +15,8 @@ namespace Editor.Editor
 
         private GraphicsDeviceManager m_graphics;
         private FormEditor m_parent;
+        private SpriteBatch m_spriteBatch;
+        private FontController m_fonts;
 
         public GameEditor()
         {
@@ -42,8 +46,9 @@ namespace Editor.Editor
 
         protected override void LoadContent()
         {
-            //m_level = new();
-            //m_level.LoadContent(Content);
+            m_spriteBatch = new SpriteBatch(GraphicsDevice); ;
+            m_fonts = new();
+            m_fonts.LoadContent(Content);
         }
 
         protected override void Update(GameTime gameTime)
@@ -55,9 +60,17 @@ namespace Editor.Editor
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            if (Project != null) Project.Render();
+            if (Project != null)
+            {
+                RasterizerState state = new RasterizerState();
+                state.CullMode = CullMode.None;
+                GraphicsDevice.RasterizerState = state;
 
-            //m_level.Render();
+                Project.Render();
+                m_spriteBatch.Begin();
+                m_fonts.Draw(m_spriteBatch, 20, InputController.Instance.ToString(), new Vector2(20, 20), Color.White);
+                m_spriteBatch.End();
+            }
 
             base.Draw(gameTime);
         }

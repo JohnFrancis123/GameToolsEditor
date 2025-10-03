@@ -1,4 +1,5 @@
 ﻿using Editor.Editor;
+using Editor.Engine;
 using System;
 using System.IO;
 using System.Text;
@@ -8,10 +9,41 @@ namespace GUI.Editor //
 {
     public partial class FormEditor : Form
     {
-        public GameEditor Game { get; set; }
+        public GameEditor Game { get => m_game; set { m_game = value; HookEvents(); } }
+        private GameEditor m_game = null;
         public FormEditor()
         {
             InitializeComponent();
+            KeyPreview = true;
+        }
+
+        private void HookEvents()
+        {
+            Form gameForm = Control.FromHandle(Game.Window.Handle) as Form;
+            gameForm.MouseDown += GameForm_MouseDown;
+            gameForm.MouseUp += GameForm_MouseUp;
+            KeyDown += GameForm_KeyDown;
+            KeyUp += GameForm_KeyUp;
+        }   
+
+        private void GameForm_MouseUp(object Sender, MouseEventArgs e)
+        {
+            InputController.Instance.SetButtonUp(e.Button);
+        }
+
+        private void GameForm_MouseDown(object sender, MouseEventArgs e)
+        {
+            InputController.Instance.SetButtonDown(e.Button);
+        }
+
+        private void GameForm_KeyUp(object sender, KeyEventArgs e)
+        {
+            InputController.Instance.SetKeyUp(e.KeyCode);
+        }
+
+        private void GameForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            InputController.Instance.SetKeyDown(e.KeyCode);
         }
 
         private void FormEditor_Load(object sender, EventArgs e)
