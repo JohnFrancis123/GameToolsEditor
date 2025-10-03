@@ -38,6 +38,10 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
             Levels.Add(CurrentLevel);
         }
 
+        public void Update(float _delta)
+        {
+            CurrentLevel?.Update(_delta);
+        }
         public void Render()
         {
             CurrentLevel.Render();

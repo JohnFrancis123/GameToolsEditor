@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
+using Editor.Editor;
+using System.Windows.Forms;
 
 namespace Editor.Engine
 {
@@ -23,7 +25,9 @@ namespace Editor.Engine
         public void LoadContent(ContentManager _content)
         {
             Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 1.0f);
-            teapot.SetShader(_content.Load<Effect>("MyShader"));
+            //teapot.SetShader(_content.Load<Effect>("MyShader"));
+            AddModel(teapot);
+            teapot = new(_content, "obj/Teapot", "Metal", "MyShader", new Vector3(1, 0, 0), 1.0f);
             AddModel(teapot);
         }
 
@@ -38,6 +42,50 @@ namespace Editor.Engine
             {
                 m.Render(m_camera.View, m_camera.Projection);
             }
+        }
+
+        public void Update(float _delta)
+        {
+            InputController ic = InputController.Instance;
+            Vector3 translate = Vector3.Zero;
+            if (ic.IsKeyDown(Keys.Left)) translate.X += -10;
+            if (ic.IsKeyDown(Keys.Right)) translate.X += 10;
+            if (ic.IsKeyDown(Keys.Menu))
+            {
+                if (ic.IsKeyDown(Keys.Up)) translate.Z += 1;
+                if (ic.IsKeyDown(Keys.Down)) translate.Z += -1;
+            }
+            else
+            {
+                if (ic.IsKeyDown(Keys.Up)) translate.Y += 10;
+                if (ic.IsKeyDown(Keys.Down)) translate.Y += -10;
+            }
+            if (ic.IsButtonDown(MouseButtons.Middle))
+            {
+                Vector2 dir = ic.MousePosition - ic.LastPosition;
+                translate.X = -dir.X;
+                translate.Y = dir.Y;
+            }
+            if(ic.GetWheel() != 0)
+            {
+                translate.Z = ic.GetWheel() * 2;
+            }
+            
+            if(translate != Vector3.Zero)
+            {
+                m_camera.Translate(translate * 0.001f);
+            }
+
+            if(ic.IsButtonDown(MouseButtons.Right))
+            {
+                Vector2 dir = ic.MousePosition - ic.LastPosition;
+                if (dir != Vector2.Zero)
+                {
+                    Vector3 movement = new Vector3(dir.Y, dir.X, 0) * _delta;
+                    m_camera.Rotate(movement);
+                }
+            }
+
         }
 
         public void Serialize(BinaryWriter _stream)
@@ -60,6 +108,11 @@ namespace Editor.Engine
                 m_models.Add(m);
             }
             m_camera.Deserialize(_stream, _content);
+        }
+
+        public override string ToString()
+        {
+            return m_camera.ToString();
         }
     }
 }
