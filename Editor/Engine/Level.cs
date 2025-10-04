@@ -36,6 +36,15 @@ namespace Editor.Engine
             m_models.Add(_model);
         }
 
+        public List<Models> GetSelectedModels()
+        {
+            List<Models> models = new List<Models>();
+            foreach(var model in m_models)
+            {
+                if (model.Selected) models.Add(model);
+            }
+            return models;
+        }
         public void Render()
         {
             foreach (Models m in m_models)
