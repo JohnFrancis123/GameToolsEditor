@@ -28,15 +28,13 @@ namespace Editor.Engine
         {
             foreach (Keys key in Enum.GetValues(typeof(Keys)))
             {
-                if (m_keyState.ContainsKey(key))
-                {
+                if (m_keyState.ContainsKey(key)) continue;
                     m_keyState.Add(key, false);
-                }
             }
             foreach (MouseButtons button in Enum.GetValues(typeof(MouseButtons)))
             {
                 if (m_buttonState.ContainsKey(button)) continue;
-                m_buttonState.Add(button, false);
+                    m_buttonState.Add(button, false);
             }
         }
         public void SetKeyDown(Keys _key)

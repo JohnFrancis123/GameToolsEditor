@@ -66,6 +66,7 @@ namespace Editor.Engine
         public override string ToString()
         {
             string s = "Camera Position: " + Position.ToString();
+            //string  s = $"Camera Position: X:{Position.X} Y:{Position.Y} Z:{Position.Z}";
             return s;
         }
 

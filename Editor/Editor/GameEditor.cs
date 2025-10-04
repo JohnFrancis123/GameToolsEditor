@@ -43,9 +43,9 @@ namespace Editor.Editor
 
         protected override void Initialize()
         {
-            RasterizerState state = new RasterizerState();
-            state.CullMode = CullMode.None;
-            GraphicsDevice.RasterizerState = state;
+            //RasterizerState state = new RasterizerState();
+            //state.CullMode = CullMode.None;
+            //GraphicsDevice.RasterizerState = state;
 
             base.Initialize();
         }
