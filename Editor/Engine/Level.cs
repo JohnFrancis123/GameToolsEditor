@@ -44,7 +44,7 @@ namespace Editor.Engine
             }
         }
 
-        public void Update(float _delta)
+        private void HandleTranslate()
         {
             InputController ic = InputController.Instance;
             Vector3 translate = Vector3.Zero;
@@ -66,17 +66,21 @@ namespace Editor.Engine
                 translate.X = -dir.X;
                 translate.Y = dir.Y;
             }
-            if(ic.GetWheel() != 0)
+            if (ic.GetWheel() != 0)
             {
                 translate.Z = ic.GetWheel() * 2;
             }
-            
-            if(translate != Vector3.Zero)
+
+            if (translate != Vector3.Zero)
             {
                 m_camera.Translate(translate * 0.001f);
             }
+        }
 
-            if(ic.IsButtonDown(MouseButtons.Right))
+        private void HandleRotate(float _delta)
+        {
+            InputController ic = InputController.Instance;
+            if (ic.IsButtonDown(MouseButtons.Right))
             {
                 Vector2 dir = ic.MousePosition - ic.LastPosition;
                 if (dir != Vector2.Zero)
@@ -85,7 +89,35 @@ namespace Editor.Engine
                     m_camera.Rotate(movement);
                 }
             }
+        }
 
+        private void HandlePick() {
+            InputController ic = InputController.Instance;
+            if (ic.IsButtonDown(MouseButtons.Left))
+            {
+                Ray r = ic.GetPickRay(m_camera);
+                foreach(Models model in m_models)
+                {
+                    model.Selected = false;
+                    foreach(ModelMesh mesh in model.Mesh.Meshes)
+                    {
+                        BoundingSphere s = mesh.BoundingSphere;
+                        s = s.Transform(model.GetTransform());
+                        float? f = r.Intersects(s);
+                        if (f.HasValue)
+                        {
+                            model.Selected = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void Update(float _delta)
+        {
+            HandleTranslate();
+            HandleRotate(_delta);
+            HandlePick();
         }
 
         public void Serialize(BinaryWriter _stream)

@@ -12,6 +12,7 @@ matrix WorldViewProjection;
 matrix World; // each matrix can be passed to one parameter
 matrix View;
 matrix Projection;
+bool Tint;
 
 texture Texture;
 sampler BasicTextureSampler = sampler_state
@@ -47,6 +48,7 @@ VertexShaderOutput MainVS(in VertexShaderInput input)
 float4 MainPS(VertexShaderOutput input) : COLOR
 {
     float3 output = tex2D(BasicTextureSampler, input.UV);
+    if (Tint) output.r = 1;
     return float4(output, 1);
 	//return input.Color;
 }

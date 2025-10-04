@@ -89,6 +89,7 @@ namespace Editor.Editor
         {
             if(Project == null) return;
             Camera c = Project.CurrentLevel.GetCamera();
+            c.Viewport = m_graphics.GraphicsDevice.Viewport;
             c.Update(c.Position, m_graphics.GraphicsDevice.Viewport.AspectRatio);
         }
     }

@@ -19,6 +19,7 @@ namespace Editor.Engine
         public Vector3 Position { get => m_position; set { m_position = value; } }
         public Vector3 Rotation { get => m_rotation; set { m_rotation = value; } }
         public float Scale { get; set; }
+        public bool Selected { get; set; } = false;
 
         // Texturing
         public Texture Texture { get; set; }
@@ -76,6 +77,7 @@ namespace Editor.Engine
             Shader.Parameters["World"].SetValue(GetTransform());
             Shader.Parameters["WorldViewProjection"].SetValue(GetTransform() * _view * _projection);
             Shader.Parameters["Texture"].SetValue(Texture);
+            Shader.Parameters["Tint"].SetValue(Selected);
 
             foreach (ModelMesh mesh in Mesh.Meshes)
             {
