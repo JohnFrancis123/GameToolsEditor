@@ -61,6 +61,24 @@ namespace Editor.Engine
             }
         }
 
+        public void Translate(Vector3 _translate, Camera _camera)
+        {
+            float distance = Vector3.Distance(_camera.Target, _camera.Position);
+            Vector3 forward = _camera.Target - _camera.Position;
+            forward.Normalize();
+            Vector3 left = Vector3.Cross(forward, Vector3.Up);
+            left.Normalize();
+            Vector3 up = Vector3.Cross(left, forward);
+            up.Normalize();
+            Position += left * _translate.X * distance;
+            Position += up * _translate.Y * distance;
+            Position += forward * _translate.Z * 100f;
+        }
+
+        public void Rotate(Vector3 _rotate)
+        {
+            Rotation += _rotate;
+        }
         public Matrix GetTransform()
         {
             return Matrix.CreateScale(Scale) *
