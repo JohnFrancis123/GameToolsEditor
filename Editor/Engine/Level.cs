@@ -48,6 +48,21 @@ namespace Editor.Engine
             }
             return models;
         }
+
+        public void SetSelectedModels(List<Models> _selectedModels)
+        {
+            int a = 0;
+
+            for(int i = 0; i < m_models.Count; i++)
+            {
+                if (m_models[i].Selected)
+                {
+                    m_models[i] = _selectedModels[a];
+                    a++;
+                }
+            }
+        }
+
         public void Render()
         {
             foreach (Models m in m_models)
@@ -183,20 +198,6 @@ namespace Editor.Engine
             ///
             //we can use HandlePick every frame, AS LONG AS it does not change the values each frame.
             HandlePick();
-        }
-
-        public void HandleProperties(Models _model) {
-            bool isDirty = false;
-            INotifyPropertyChanged notifier = (INotifyPropertyChanged)_model;
-            if(notifier != null)
-            {
-                notifier.PropertyChanged += (sender, e) => { isDirty = true; };
-            }
-
-            if (isDirty)
-            {
-
-            }
         }
 
         public void Serialize(BinaryWriter _stream)

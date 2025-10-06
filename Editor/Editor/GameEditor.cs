@@ -7,12 +7,20 @@ using GUI.Editor;
 using System;
 using System.ComponentModel;
 using Editor.Engine;
+using System.Collections.Generic;
 
 namespace Editor.Editor
 {
     public class GameEditor : Game
     {
         internal Project Project { get; set; }
+
+        private List<INotifyPropertyChanged> m_subscribedModels = new();
+
+        private void ModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            m_dirty = true;
+        }
 
         private GraphicsDeviceManager m_graphics;
         private FormEditor m_parent;
@@ -89,8 +97,34 @@ namespace Editor.Editor
                     m_parent.propertyGrid.SelectedObject = models[0];
                     m_dirty = false;
                 }
-            }
 
+                List<INotifyPropertyChanged> changedModels = new(m_parent.propertyGrid.SelectedObjects.Length);
+                for(int i = 0; i < m_parent.propertyGrid.SelectedObjects.Length; i++)
+                {
+                    changedModels.Add((INotifyPropertyChanged)m_parent.propertyGrid.SelectedObjects[i]);
+                }
+
+                for (int i = 0; i < changedModels.Count; i++)
+                {
+                    if (changedModels[i] != null)
+                    {
+                        models[i] = (Models)m_parent.propertyGrid.SelectedObjects[i];
+                    }
+                }
+                Project.CurrentLevel.SetSelectedModels(models);
+
+
+
+                //foreach (var model in models)
+                //{
+                //    INotifyPropertyChanged changed = (INotifyPropertyChanged)model;
+                //    if (changed != null)
+                //    {
+                //        changedModels.Add(changed);
+                //    }
+                //}
+
+            }
             base.Update(_gameTime);
         } //
 

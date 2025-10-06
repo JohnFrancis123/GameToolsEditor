@@ -7,25 +7,67 @@ using Editor.Engine.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.ComponentModel;
 using System.IO;
 
 namespace Editor.Engine
 {
-    class Models : ISerializable
+    class Models : ISerializable, INotifyPropertyChanged
     {
         // Accessors
         public Model Mesh { get; set; }
         public Effect Shader { get; set; } 
-        public Vector3 Position { get => m_position; set { m_position = value; } }
-        public Vector3 Rotation { get => m_rotation; set { m_rotation = value; } }
-        public float Scale { get; set; }
-        public bool Selected { get; set; } = false;
-
+        public Vector3 Position { get => m_position; 
+            set
+            { 
+                m_position = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Position"));
+            } 
+        }
+        public Vector3 Rotation { get => m_rotation; 
+            set 
+            { 
+                m_rotation = value; 
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation"));
+            } 
+        }
+        public float Scale { get => m_scale;
+            set 
+            {
+                m_scale = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Scale"));
+            }
+        }
+        public bool Selected
+        {
+            get => m_selected;
+            set
+            {
+                m_selected = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected"));
+            }
+        }
         // Texturing
-        public Texture Texture { get; set; }
+        public Texture Texture
+        {
+            get => m_texture;
+            set
+            {
+                m_texture = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Texture"));
+            }
+        }
+
+        //event for property changes
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+
 
         private Vector3 m_position;
         private Vector3 m_rotation;
+        private float m_scale;
+        private bool m_selected;
+        private Texture m_texture;
 
         public Models()
         {
@@ -47,6 +89,7 @@ namespace Editor.Engine
             SetShader(Shader);
             m_position = _position;
             Scale = _scale;
+            Selected = false;
         }
 
         public void SetShader(Effect _effect)
