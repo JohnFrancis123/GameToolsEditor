@@ -95,7 +95,7 @@ namespace Editor.Editor
                 m_spriteBatch.End();
             }
 
-            base.Draw(gameTime); //
+            base.Draw(gameTime); 
         }
 
         public void AdjustAspectRatio()
