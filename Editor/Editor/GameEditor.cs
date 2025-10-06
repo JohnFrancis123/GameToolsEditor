@@ -15,13 +15,6 @@ namespace Editor.Editor
     {
         internal Project Project { get; set; }
 
-        private List<INotifyPropertyChanged> m_subscribedModels = new();
-
-        private void ModelPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            m_dirty = true;
-        }
-
         private GraphicsDeviceManager m_graphics;
         private FormEditor m_parent;
         private SpriteBatch m_spriteBatch;
@@ -112,7 +105,7 @@ namespace Editor.Editor
                     }
                 }
                 Project.CurrentLevel.SetSelectedModels(models);
-
+                
 
 
                 //foreach (var model in models)

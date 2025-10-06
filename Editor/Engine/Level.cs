@@ -30,8 +30,8 @@ namespace Editor.Engine
             Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 1.0f);
             //teapot.SetShader(_content.Load<Effect>("MyShader"));
             AddModel(teapot);
-            teapot = new(_content, "obj/Teapot", "Metal", "MyShader", new Vector3(1, 0, 0), 1.0f);
-            AddModel(teapot);
+            //teapot = new(_content, "obj/Teapot", "Metal", "MyShader", new Vector3(1, 0, 0), 1.0f);
+            //AddModel(teapot);
         }
 
         public void AddModel(Models _model)
