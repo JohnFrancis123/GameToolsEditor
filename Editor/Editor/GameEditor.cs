@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Editor;
 using GUI.Editor;
 using System;
+using System.ComponentModel;
 using Editor.Engine;
 
 namespace Editor.Editor
@@ -17,8 +18,11 @@ namespace Editor.Editor
         private FormEditor m_parent;
         private SpriteBatch m_spriteBatch;
         private FontController m_fonts;
+
         RasterizerState m_rasterState = new RasterizerState();
         DepthStencilState m_depthStencilState = new DepthStencilState();
+
+        private bool m_dirty;
 
         public GameEditor()
         {
@@ -29,6 +33,8 @@ namespace Editor.Editor
             m_rasterState.CullMode = CullMode.None;
             m_depthStencilState = new DepthStencilState();
             m_depthStencilState.DepthBufferEnable = true;
+
+            m_dirty = false;
         }
 
         public GameEditor(FormEditor _parent) : this()
@@ -57,28 +63,41 @@ namespace Editor.Editor
             m_fonts.LoadContent(Content);
         }
 
+        //setting the selected property of the property grid every tick
         protected override void Update(GameTime _gameTime)
         {
             if(Project != null)
             {
                 Project.Update((float)(_gameTime.ElapsedGameTime.TotalMilliseconds / 1000));
                 InputController.Instance.Clear();
+                //
+
                 var models = Project.CurrentLevel.GetSelectedModels();
-                if (models.Count == 0) 
+
+                if (models.Count == 0)
                 {
                     m_parent.propertyGrid.SelectedObject = null;
+                    m_dirty = true;
                 }
-                else if(models.Count > 1)
+                else if (models.Count > 1 && m_dirty)
                 {
                     m_parent.propertyGrid.SelectedObjects = models.ToArray();
+                    m_dirty = false;
                 }
-                else
+                else if (models.Count == 1 && m_dirty)
                 {
                     m_parent.propertyGrid.SelectedObject = models[0];
+                    m_dirty = false;
                 }
             }
+
             base.Update(_gameTime);
         } //
+
+        private void HandleSelections()
+        {
+
+        }
 
         protected override void Draw(GameTime gameTime)
         {

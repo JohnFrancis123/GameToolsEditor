@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.ComponentModel;
 using System.IO;
 using Editor.Editor;
 using System.Windows.Forms;
+using GUI.Editor;
+using SharpDX.WIC;
 
 namespace Editor.Engine
 {
@@ -16,7 +19,7 @@ namespace Editor.Engine
 
         // Members
         private List<Models> m_models = new();
-        private Camera m_camera = new(new Vector3(0, 2, 2), 16.0f / 9.0f); //my resolution is 16x10
+        private Camera m_camera = new(new Vector3(0, 2, 2), 16.0f / 9.0f); //my resolution is 16x10f
 
         public Level()
         {
@@ -144,7 +147,9 @@ namespace Editor.Engine
             }
         }
 
+        //Problematic: Changes Selected value EVERY FRAME. Need to change to work on mouse click only
         private void HandlePick() {
+
             InputController ic = InputController.Instance;
             if (ic.IsButtonDown(MouseButtons.Left))
             {
@@ -166,12 +171,32 @@ namespace Editor.Engine
             }
         }
 
+        //The root issue is here. We update EVERY SINGLE FRAME.
         public void Update(float _delta)
         {
+
+            //THEN, ALL of the properties are changed right here.
+            ///CHANGE THESE. THEY MUST ONLY WORK DURING THE 
             HandleTranslate();
             HandleRotate(_delta);
             HandleScale(_delta);
+            ///
+            //we can use HandlePick every frame, AS LONG AS it does not change the values each frame.
             HandlePick();
+        }
+
+        public void HandleProperties(Models _model) {
+            bool isDirty = false;
+            INotifyPropertyChanged notifier = (INotifyPropertyChanged)_model;
+            if(notifier != null)
+            {
+                notifier.PropertyChanged += (sender, e) => { isDirty = true; };
+            }
+
+            if (isDirty)
+            {
+
+            }
         }
 
         public void Serialize(BinaryWriter _stream)

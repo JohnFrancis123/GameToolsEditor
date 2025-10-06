@@ -89,8 +89,8 @@ namespace Editor.Engine
         public void Render(Matrix _view, 
                            Matrix _projection)
         {
-            m_position.X += 0.001f;
-            m_rotation.Y += 0.005f;
+            //m_position.X += 0.001f;
+            //m_rotation.Y += 0.005f;
 
             Shader.Parameters["World"].SetValue(GetTransform());
             Shader.Parameters["WorldViewProjection"].SetValue(GetTransform() * _view * _projection);
