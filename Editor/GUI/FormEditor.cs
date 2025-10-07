@@ -2,6 +2,7 @@
 using Editor.Engine;
 using Microsoft.Xna.Framework;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -12,43 +13,10 @@ namespace GUI.Editor //
     {
         public GameEditor Game { get => m_game; set { m_game = value; HookEvents(); } }
         private GameEditor m_game = null;
-
-        private readonly System.Windows.Forms.Timer refreshTimer;
-        private bool propertyValueUpdated = false; 
- 
-
         public FormEditor()
         {
             InitializeComponent();
             KeyPreview = true;
-
-            refreshTimer = new System.Windows.Forms.Timer();
-            refreshTimer.Interval = 100;
-            refreshTimer.Tick += RefreshTimerTick;
-            refreshTimer.Start();
-        }
-        private void RefreshTimerTick(object sender, EventArgs e)
-        {
-            // Check and reset the flag using the 'this' reference as the lock
-            lock (this)
-            {
-                if (propertyValueUpdated)
-                {
-                    // We are on the UI thread, so propertyGrid.Refresh() is safe here.
-                    propertyGrid.Refresh();
-
-                    // Reset the flag
-                    propertyValueUpdated = false;
-                }
-            }
-        }
-        public void SignalPropertyUpdated()
-        {
-            // Set the flag using the 'this' reference as the lock
-            lock (this)
-            {
-                propertyValueUpdated = true;
-            }
         }
 
         private void HookEvents()
@@ -186,5 +154,15 @@ namespace GUI.Editor //
         {
 
         }
+
+        //private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+        //{
+        //    if (Game == null || Game.Project == null) return;
+        //    INotifyPropertyChanged changed = (INotifyPropertyChanged)e.ChangedItem.Value;
+        //    if (changed != null)
+        //    { 
+        //        propertyGrid.AccessibilityObject.RaiseAutomationEvent(s);
+        //    }
+        //}
     }
 }

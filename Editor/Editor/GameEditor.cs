@@ -75,36 +75,59 @@ namespace Editor.Editor
 
                 var models = Project.CurrentLevel.GetSelectedModels();
 
+                List<INotifyPropertyChanged> changedModels = new(models.Count);
+                int i = 0;
+                int a = 0;
+
+                INotifyPropertyChanged changed = null;
+                while ((i < models.Count) && models.Count != 0)
+                {
+                    changed = (INotifyPropertyChanged)models[i];
+                    if(changed == (INotifyPropertyChanged)"Selected")
+
+
+                    if ((INotifyPropertyChanged)models[i] != null)
+                    {
+                        changedModels.Add((INotifyPropertyChanged)models[i]);
+                        a = i;
+                    }
+                    i++;
+                }
+
                 if (models.Count == 0)
                 {
                     m_parent.propertyGrid.SelectedObject = null;
                     m_dirty = true;
                 }
-                else if (models.Count > 1 && m_dirty)
+                else if ((models.Count > 1 && m_dirty) || changedModels.Count > 1)
                 {
                     m_parent.propertyGrid.SelectedObjects = models.ToArray();
                     m_dirty = false;
                 }
-                else if (models.Count == 1 && m_dirty)
+                else if ((models.Count == 1 && m_dirty) || changedModels.Count == 1)
                 {
                     m_parent.propertyGrid.SelectedObject = models[0];
                     m_dirty = false;
                 }
 
-                List<INotifyPropertyChanged> changedModels = new(m_parent.propertyGrid.SelectedObjects.Length);
-                for(int i = 0; i < m_parent.propertyGrid.SelectedObjects.Length; i++)
-                {
-                    changedModels.Add((INotifyPropertyChanged)m_parent.propertyGrid.SelectedObjects[i]);
-                }
 
-                for (int i = 0; i < changedModels.Count; i++)
-                {
-                    if (changedModels[i] != null)
-                    {
-                        models[i] = (Models)m_parent.propertyGrid.SelectedObjects[i];
-                    }
-                }
-                Project.CurrentLevel.SetSelectedModels(models);
+
+                //m_parent.propertyGrid.SelectedObjects = models.ToArray();
+
+
+                //for(int i = 0; i < m_parent.propertyGrid.SelectedObjects.Length; i++)
+                //{
+                //    changedModels.Add((INotifyPropertyChanged)m_parent.propertyGrid.SelectedObjects[i]);
+                //}
+
+                //for (int i = 0; i < changedModels.Count; i++)
+                //{
+                //    if (changedModels[i] != null)
+                //    {
+                //        models[i] = (Models)m_parent.propertyGrid.SelectedObjects[i];
+                //    }
+                //}
+                //Project.CurrentLevel.SetSelectedModels(models);
                 
 
 
