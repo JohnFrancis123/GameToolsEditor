@@ -127,6 +127,9 @@ namespace Editor.Engine
 
         public void Translate(Vector3 _translate, Camera _camera)
         {
+            Vector3 zeroVec = new Vector3(0, 0, 0);
+            if (_translate == zeroVec) return;
+
             float distance = Vector3.Distance(_camera.Target, _camera.Position);
             Vector3 forward = _camera.Target - _camera.Position;
             forward.Normalize();
@@ -141,6 +144,8 @@ namespace Editor.Engine
 
         public void Rotate(Vector3 _rotate)
         {
+            Vector3 zeroVec = new Vector3(0, 0, 0);
+            if (_rotate == zeroVec) return;
             Rotation += _rotate;
         }
         public Matrix GetTransform()
