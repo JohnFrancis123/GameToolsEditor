@@ -82,10 +82,7 @@ namespace Editor.Editor
                 INotifyPropertyChanged changed = null;
                 while ((i < models.Count) && models.Count != 0)
                 {
-                    changed = (INotifyPropertyChanged)models[i];
-                    if(changed == (INotifyPropertyChanged)"Selected")
-
-
+                    changed = models[i];
                     if ((INotifyPropertyChanged)models[i] != null)
                     {
                         changedModels.Add((INotifyPropertyChanged)models[i]);

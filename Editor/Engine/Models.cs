@@ -16,26 +16,41 @@ namespace Editor.Engine
     {
         // Accessors
         public Model Mesh { get; set; }
-        public Effect Shader { get; set; } 
+        public Effect Shader { get; set; }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         public Vector3 Position { get => m_position; 
             set
-            { 
-                m_position = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Position"));
+            {
+                if (m_position != value)
+                {
+                    m_position = value;
+                    OnPropertyChanged("Position");
+                }
             } 
         }
         public Vector3 Rotation { get => m_rotation; 
             set 
-            { 
-                m_rotation = value; 
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Rotation"));
+            {
+                if (m_rotation != value)
+                {
+                    m_rotation = value;
+                    OnPropertyChanged("Rotation");
+                }
             } 
         }
         public float Scale { get => m_scale;
             set 
             {
-                m_scale = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Scale"));
+                if (m_scale != value)
+                {
+                    m_scale = value;
+                    OnPropertyChanged("Scale");
+                }
             }
         }
         public bool Selected
@@ -43,8 +58,11 @@ namespace Editor.Engine
             get => m_selected;
             set
             {
-                m_selected = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected"));
+                if (m_selected != value)
+                {
+                    m_selected = value;
+                    OnPropertyChanged("Selected");
+                }
             }
         }
         // Texturing
@@ -53,8 +71,11 @@ namespace Editor.Engine
             get => m_texture;
             set
             {
-                m_texture = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Texture"));
+                if (m_texture != value)
+                {
+                    m_texture = value;
+                    OnPropertyChanged("Texture");
+                }
             }
         }
 
