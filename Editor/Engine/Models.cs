@@ -4,6 +4,7 @@
 //using System.Text;
 //using System.Threading.Tasks;
 using Editor.Engine.Interfaces;
+using Editor.Engine.ModelAttribs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -23,12 +24,20 @@ namespace Editor.Engine
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public Transformation Transformation { get => m_transformation; 
+            set
+            {
+                m_transformation = value;
+            }
+        }
         public Vector3 Position { get => m_position; 
             set
             {
                 if (m_position != value)
                 {
                     m_position = value;
+
+                    m_transformation.Position = value;
                     OnPropertyChanged("Position");
                 }
             } 
@@ -39,6 +48,7 @@ namespace Editor.Engine
                 if (m_rotation != value)
                 {
                     m_rotation = value;
+                    m_transformation.Rotation = value;
                     OnPropertyChanged("Rotation");
                 }
             } 
@@ -49,10 +59,14 @@ namespace Editor.Engine
                 if (m_scale != value)
                 {
                     m_scale = value;
+                    m_transformation.Scale = value;
                     OnPropertyChanged("Scale");
                 }
             }
         }
+
+
+
         public bool Selected
         {
             get => m_selected;
@@ -89,6 +103,7 @@ namespace Editor.Engine
         private float m_scale;
         private bool m_selected;
         private Texture m_texture;
+        private Transformation m_transformation;
 
         public Models()
         {
