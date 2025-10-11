@@ -10,7 +10,7 @@ namespace Editor.Engine.ModelAttribs
     [TypeConverter(typeof(ExpandableObjectConverter))]
     public class Appearance
     {
-        public string DiffuseTexture { get; set; }
+        public List<string> DiffuseTexture { get; set; }
 
         public override string ToString()
         {
