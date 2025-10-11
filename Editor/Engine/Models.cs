@@ -38,7 +38,6 @@ namespace Editor.Engine
                 m_state = value;
             }
         }
-
         #region transformations
         //public Vector3 Position { get => m_position; 
         //    set
@@ -89,6 +88,18 @@ namespace Editor.Engine
         //    }
         //}
         #endregion state
+
+
+        public Appearance Appearance { get => m_appearance; 
+            set 
+            {
+                if (m_appearance != value)
+                {
+                    m_appearance = value;
+                }
+            } 
+        }
+
         // Texturing
         public Texture Texture
         {
@@ -115,6 +126,7 @@ namespace Editor.Engine
         private Texture m_texture;
         private Transformation m_transformation;
         private State m_state;
+        private Appearance m_appearance;
 
         public Models()
         {
@@ -124,6 +136,11 @@ namespace Editor.Engine
         {
             m_transformation = new();
             m_state = new();
+            m_appearance = new();
+            Appearance.DiffuseTexture.Add("Grass");
+            Appearance.DiffuseTexture.Add("HeightMap");
+            Appearance.DiffuseTexture.Add("Metal");
+
             Create(_content, _model, _texture, _effect, _position, _scale);
         }
 
@@ -134,6 +151,9 @@ namespace Editor.Engine
             Mesh.Tag = _model;
             Texture = _content.Load<Texture>(_texture);
             Texture.Tag = _texture;
+
+
+
             Shader = _content.Load<Effect>(_effect);
             Shader.Tag = _effect;
             SetShader(Shader);

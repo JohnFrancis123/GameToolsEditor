@@ -8,5 +8,6 @@ namespace Editor.Engine.ModelAttribs
 {
     internal class Appearance
     {
+        public List<string> DiffuseTexture { get; set; }
     }
 }
