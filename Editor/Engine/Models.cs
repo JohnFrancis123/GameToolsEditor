@@ -83,9 +83,9 @@ namespace Editor.Engine
             m_state = new();
             m_appearance = new();
             m_textures = new();
-            m_textures.Add("Grass");
-            m_textures.Add("HeightMap");
-            m_textures.Add("Metal");
+            //m_textures.Add("Grass");
+            //m_textures.Add("HeightMap");
+            //m_textures.Add("Metal");
             m_appearance.DiffuseTexture = _texture;
 
             Create(_content, _model, _texture, _effect, _position, _scale);
@@ -97,7 +97,7 @@ namespace Editor.Engine
             m_mesh = _content.Load<Model>(_model);
             m_mesh.Tag = _model;
             m_texture = _content.Load<Texture>(_texture);
-            m_texture.Tag = m_textures[2];
+            m_texture.Tag = _texture;
 
 
 
@@ -109,6 +109,11 @@ namespace Editor.Engine
             Transformation.Position = _position;
             Transformation.Scale = _scale;
             m_state.Selected = false;
+        }
+
+        public void UpdateTex(ContentManager _content)
+        {
+            m_texture = _content.Load<Texture>(m_texture.Tag.ToString());
         }
 
         public void SetShader(Effect _effect)

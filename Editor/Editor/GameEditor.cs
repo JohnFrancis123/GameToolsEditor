@@ -62,8 +62,10 @@ namespace Editor.Editor
                 model.PropertyChanged += OnModelPropertyChanged;
             }
 
+            // 🛑 FIX: SET the dirty flag because a change in selection requires a UI update.
+            m_dirty = true;
+
             // --- 4. Store the new selection for the next cycle ---
-            // Note: Do this *after* all event handling logic is complete.
             m_selected = selection;
         }
 
@@ -81,20 +83,22 @@ namespace Editor.Editor
 
             //execution continues here ONLY on the safe UI thread
 
-            //setting the dirty flag (original logic)
-            if (e.PropertyName != "Selected" && sender is Models)
+            // 🛑 FIX: SET the dirty flag for any property change that requires a UI update.
+            if (sender is Models)
             {
-                m_dirty = true;
+                // Property change (non-selection)
+                if (e.PropertyName != "Selected")
+                {
+                    m_dirty = true;
+                }
+                // Selection change
+                else if (e.PropertyName == "Selected")
+                {
+                    m_dirty = true;
+                }
             }
 
-            //forcing the Property Grid to update its display.
-            //the Property Grid *should* update automatically, but if it fails, 
-            //explicitly telling it to Refresh() is the definitive fix.
-            //we only need to refresh if a property *other* than 'Selected' changed.
-            if (e.PropertyName != "Selected")
-            {
-                m_parent.propertyGrid.Refresh();
-            }
+            // The direct m_parent.propertyGrid.Refresh() call is removed here.
         }
 
         public GameEditor()
@@ -139,11 +143,10 @@ namespace Editor.Editor
         //setting the selected property of the property grid every tick
         protected override void Update(GameTime _gameTime)
         {
-            if(Project != null)
+            if (Project != null)
             {
                 Project.Update((float)(_gameTime.ElapsedGameTime.TotalMilliseconds / 1000));
                 InputController.Instance.Clear();
-                //
 
                 var models = Project.CurrentLevel.GetSelectedModels().ToArray();
 
@@ -152,9 +155,35 @@ namespace Editor.Editor
                     UpdateSelectionAndModels(models);
                 }
 
+                // 🛑 FIX: Check the dirty flag and force the Property Grid update via Invoke.
+                if (m_dirty)
+                {
+                    // We must Invoke because the Update method is on the MonoGame thread.
+                    if (m_parent.propertyGrid.InvokeRequired)
+                    {
+                        m_parent.propertyGrid.Invoke(new Action(PropertyGridUpdateAndClear));
+                    }
+                    else
+                    {
+                        // Fallback for execution on the same thread (unlikely).
+                        PropertyGridUpdateAndClear();
+                    }
+                }
             }
             base.Update(_gameTime);
-        } //
+        }
+        private void PropertyGridUpdateAndClear()
+        {
+            // Double-check the flag state before acting
+            if (m_dirty)
+            {
+                // 🛑 ACT: Tell the Property Grid to update its displayed values.
+                m_parent.propertyGrid.Refresh();
+
+                // 🛑 CLEAR: Reset the dirty flag immediately after the action.
+                m_dirty = false;
+            }
+        }
 
         private void HandleSelections()
         {
