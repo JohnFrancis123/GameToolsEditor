@@ -8,6 +8,8 @@ using Editor.Engine.ModelAttribs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
+
 //using SharpDX.Direct2D1;
 using System.ComponentModel;
 using System.IO;
@@ -18,79 +20,27 @@ namespace Editor.Engine
     class Models : ISerializable, INotifyPropertyChanged
     {
         // Accessors
-        //public Model Mesh { get; set; }
-        //public Effect Shader { get; set; }
-
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public Transformation Transformation { get => m_transformation; 
+        public Transformation Transformation { 
+            get => m_transformation; 
             set
             {
                 OnPropertyChanged("Transformation");
                 m_transformation = value;
             }
         }
-        public State State { get => m_state; 
+        public State State { 
+            get => m_state; 
             set
             {
                 OnPropertyChanged("Selected");
                 m_state = value;
             }
         }
-        #region transformations
-        //public Vector3 Position { get => m_position; 
-        //    set
-        //    {
-        //        if (m_position != value)
-        //        {
-        //            m_position = value;
-
-        //            m_transformation.Position = value;
-        //            //OnPropertyChanged("Position");
-        //        }
-        //    } 
-        //}
-        //public Vector3 Rotation { get => m_rotation; 
-        //    set 
-        //    {
-        //        if (m_rotation != value)
-        //        {
-        //            m_rotation = value;
-        //            m_transformation.Rotation = value;
-        //            //OnPropertyChanged("Rotation");
-        //        }
-        //    } 
-        //}
-        //public float Scale { get => m_scale;
-        //    set 
-        //    {
-        //        if (m_scale != value)
-        //        {
-        //            m_scale = value;
-        //            m_transformation.Scale = value;
-        //            //OnPropertyChanged("Scale");
-        //        }
-        //    }
-        //}
-        #endregion transformations
-        #region state
-        //public bool Selected
-        //{
-        //    get => m_selected;
-        //    set
-        //    {
-        //        if (m_selected != value)
-        //        {
-        //            m_selected = value;
-        //            OnPropertyChanged("Selected");
-        //        }
-        //    }
-        //}
-        #endregion state
-
 
         public Appearance Appearance { get => m_appearance; 
             set 
@@ -98,23 +48,10 @@ namespace Editor.Engine
                 if (m_appearance != value)
                 {
                     m_appearance = value;
+                    OnPropertyChanged("Appearance");
                 }
             } 
         }
-
-        // Texturing
-        //public Texture Texture
-        //{
-        //    get => m_texture;
-        //    set
-        //    {
-        //        if (m_texture != value)
-        //        {
-        //            m_texture = value;
-        //            OnPropertyChanged("Texture");
-        //        }
-        //    }
-        //}
 
         //event for property changes
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -132,6 +69,8 @@ namespace Editor.Engine
         private State m_state;
         private Appearance m_appearance;
 
+        private List<string> m_textures;
+
         public Model GetMesh() { return m_mesh; }
 
         public Models()
@@ -143,11 +82,11 @@ namespace Editor.Engine
             m_transformation = new();
             m_state = new();
             m_appearance = new();
-
-            m_appearance.DiffuseTexture = new();
-            m_appearance.DiffuseTexture.Add("Grass");
-            m_appearance.DiffuseTexture.Add("HeightMap");
-            m_appearance.DiffuseTexture.Add("Metal");
+            m_textures = new();
+            m_textures.Add("Grass");
+            m_textures.Add("HeightMap");
+            m_textures.Add("Metal");
+            m_appearance.DiffuseTexture = _texture;
 
             Create(_content, _model, _texture, _effect, _position, _scale);
         }
@@ -158,7 +97,7 @@ namespace Editor.Engine
             m_mesh = _content.Load<Model>(_model);
             m_mesh.Tag = _model;
             m_texture = _content.Load<Texture>(_texture);
-            m_texture.Tag = _texture;
+            m_texture.Tag = m_textures[2];
 
 
 
@@ -167,8 +106,8 @@ namespace Editor.Engine
             SetShader(m_shader);
             //m_position = _position;
             //Scale = _scale;
-            m_transformation.Position = _position;
-            m_transformation.Scale = _scale;
+            Transformation.Position = _position;
+            Transformation.Scale = _scale;
             m_state.Selected = false;
         }
 
@@ -189,6 +128,8 @@ namespace Editor.Engine
             Vector3 zeroVec = new Vector3(0, 0, 0);
             if (_translate == zeroVec) return;
 
+            OnPropertyChanged("Transformation");
+
             float distance = Vector3.Distance(_camera.Target, _camera.Position);
             Vector3 forward = _camera.Target - _camera.Position;
             forward.Normalize();
@@ -205,8 +146,18 @@ namespace Editor.Engine
         {
             Vector3 zeroVec = new Vector3(0, 0, 0);
             if (_rotate == zeroVec) return;
+
+            OnPropertyChanged("Transformation");
             Transformation.Rotation += _rotate;
         }
+
+        public void Scale(float _scale)
+        {
+            if (_scale == 0) return;
+            OnPropertyChanged("Transformation");
+            Transformation.Scale += _scale;
+        }
+
         public Matrix GetTransform()
         {
             return Matrix.CreateScale(Transformation.Scale) *
