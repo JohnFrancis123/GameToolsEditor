@@ -131,7 +131,7 @@ namespace Editor.Engine
                         if (model.Selected)
                         {
                             modelRotated = true;
-                            model.Rotation += movement;
+                            model.Transformation.Rotation += movement;
                         }
                         if (!modelRotated)
                         {
@@ -155,7 +155,7 @@ namespace Editor.Engine
                     {
                         if (model.Selected)
                         {
-                            model.Scale += l;
+                            model.Transformation.Scale += l;
                         }
                     }
                 }
@@ -229,8 +229,8 @@ namespace Editor.Engine
             {
                 if (m.Selected)
                 {
-                    s += "\nModel: Pos: " + m.Position.ToString() +
-                        " Rot: " + m.Rotation.ToString();
+                    s += "\nModel: Pos: " + m.Transformation.Position.ToString() +
+                        " Rot: " + m.Transformation.Rotation.ToString();
                 }
             }
             return m_camera.ToString() + s;

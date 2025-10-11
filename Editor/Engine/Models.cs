@@ -27,43 +27,46 @@ namespace Editor.Engine
         public Transformation Transformation { get => m_transformation; 
             set
             {
+                OnPropertyChanged("Transformation");
                 m_transformation = value;
             }
         }
-        public Vector3 Position { get => m_position; 
-            set
-            {
-                if (m_position != value)
-                {
-                    m_position = value;
+        #region transformations
+        //public Vector3 Position { get => m_position; 
+        //    set
+        //    {
+        //        if (m_position != value)
+        //        {
+        //            m_position = value;
 
-                    m_transformation.Position = value;
-                    OnPropertyChanged("Position");
-                }
-            } 
-        }
-        public Vector3 Rotation { get => m_rotation; 
-            set 
-            {
-                if (m_rotation != value)
-                {
-                    m_rotation = value;
-                    m_transformation.Rotation = value;
-                    OnPropertyChanged("Rotation");
-                }
-            } 
-        }
-        public float Scale { get => m_scale;
-            set 
-            {
-                if (m_scale != value)
-                {
-                    m_scale = value;
-                    m_transformation.Scale = value;
-                    OnPropertyChanged("Scale");
-                }
-            }
-        }
+        //            m_transformation.Position = value;
+        //            //OnPropertyChanged("Position");
+        //        }
+        //    } 
+        //}
+        //public Vector3 Rotation { get => m_rotation; 
+        //    set 
+        //    {
+        //        if (m_rotation != value)
+        //        {
+        //            m_rotation = value;
+        //            m_transformation.Rotation = value;
+        //            //OnPropertyChanged("Rotation");
+        //        }
+        //    } 
+        //}
+        //public float Scale { get => m_scale;
+        //    set 
+        //    {
+        //        if (m_scale != value)
+        //        {
+        //            m_scale = value;
+        //            m_transformation.Scale = value;
+        //            //OnPropertyChanged("Scale");
+        //        }
+        //    }
+        //}
+        #endregion transformations
 
 
 
@@ -98,9 +101,9 @@ namespace Editor.Engine
 
 
 
-        private Vector3 m_position;
-        private Vector3 m_rotation;
-        private float m_scale;
+        //private Vector3 m_position;
+        //private Vector3 m_rotation;
+        //private float m_scale;
         private bool m_selected;
         private Texture m_texture;
         private Transformation m_transformation;
@@ -111,11 +114,13 @@ namespace Editor.Engine
 
         public Models(ContentManager _content, string _model, string _texture, string _effect, Vector3 _position, float _scale)
         {
+            m_transformation = new();
             Create(_content, _model, _texture, _effect, _position, _scale);
         }
 
         public void Create(ContentManager _content, string _model, string _texture, string _effect, Vector3 _position, float _scale) 
         {
+            //m_transformation = new();
             Mesh = _content.Load<Model>(_model);
             Mesh.Tag = _model;
             Texture = _content.Load<Texture>(_texture);
@@ -123,8 +128,10 @@ namespace Editor.Engine
             Shader = _content.Load<Effect>(_effect);
             Shader.Tag = _effect;
             SetShader(Shader);
-            m_position = _position;
-            Scale = _scale;
+            //m_position = _position;
+            //Scale = _scale;
+            m_transformation.Position = _position;
+            m_transformation.Scale = _scale;
             Selected = false;
         }
 
@@ -152,22 +159,22 @@ namespace Editor.Engine
             left.Normalize();
             Vector3 up = Vector3.Cross(left, forward);
             up.Normalize();
-            Position += left * _translate.X * distance;
-            Position += up * _translate.Y * distance;
-            Position += forward * _translate.Z * 100f;
+            Transformation.Position += left * _translate.X * distance;
+            Transformation.Position += up * _translate.Y * distance;
+            Transformation.Position += forward * _translate.Z * 100f;
         }
 
         public void Rotate(Vector3 _rotate)
         {
             Vector3 zeroVec = new Vector3(0, 0, 0);
             if (_rotate == zeroVec) return;
-            Rotation += _rotate;
+            Transformation.Rotation += _rotate;
         }
         public Matrix GetTransform()
         {
-            return Matrix.CreateScale(Scale) *
-                   Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z) *
-                   Matrix.CreateTranslation(Position);
+            return Matrix.CreateScale(Transformation.Scale) *
+                   Matrix.CreateFromYawPitchRoll(Transformation.Rotation.Y, Transformation.Rotation.X, Transformation.Rotation.Z) *
+                   Matrix.CreateTranslation(Transformation.Position);
         }
 
         public void Render(Matrix _view, 
@@ -192,20 +199,21 @@ namespace Editor.Engine
             _stream.Write(Mesh.Tag.ToString());
             _stream.Write(Texture.Tag.ToString());
             _stream.Write(Shader.Tag.ToString());
-            HelpSerialize.Vec3(_stream, Position);
-            HelpSerialize.Vec3(_stream, Rotation);
-            _stream.Write(Scale);
+            HelpSerialize.Vec3(_stream, Transformation.Position);
+            HelpSerialize.Vec3(_stream, Transformation.Rotation);
+            _stream.Write(Transformation.Scale);
         }
 
         public void Deserialize(BinaryReader _stream, ContentManager _content) 
-        { 
+        {
+            Transformation = new();
             string mesh = _stream.ReadString();
             string texture = _stream.ReadString();
             string shader = _stream.ReadString();
-            Position = HelpDeserialize.Vec3(_stream);
-            Rotation = HelpDeserialize.Vec3(_stream);
-            Scale = _stream.ReadSingle();
-            Create(_content, mesh, texture, shader, Position, Scale);
+            Transformation.Position = HelpDeserialize.Vec3(_stream);
+            Transformation.Rotation = HelpDeserialize.Vec3(_stream);
+            Transformation.Scale = _stream.ReadSingle();
+            Create(_content, mesh, texture, shader, Transformation.Position, Transformation.Scale);
         }
     }
 }
