@@ -44,7 +44,7 @@ namespace Editor.Engine
             List<Models> models = new List<Models>();
             foreach(var model in m_models)
             {
-                if (model.Selected) models.Add(model);
+                if (model.State.Selected) models.Add(model);
             }
             return models;
         }
@@ -55,7 +55,7 @@ namespace Editor.Engine
 
             for(int i = 0; i < m_models.Count; i++)
             {
-                if (m_models[i].Selected)
+                if (m_models[i].State.Selected)
                 {
                     m_models[i] = _selectedModels[a];
                     a++;
@@ -103,7 +103,7 @@ namespace Editor.Engine
                 bool modelTranslated = false;
                 foreach(Models model in m_models)
                 {
-                    if (model.Selected)
+                    if (model.State.Selected)
                     {
                         modelTranslated = true;
                         model.Translate(translate / 1000, m_camera);
@@ -128,7 +128,7 @@ namespace Editor.Engine
                     bool modelRotated = false;
                     foreach (Models model in m_models)
                     {
-                        if (model.Selected)
+                        if (model.State.Selected)
                         {
                             modelRotated = true;
                             model.Transformation.Rotation += movement;
@@ -153,7 +153,7 @@ namespace Editor.Engine
                     l *= _delta;
                     foreach(Models model in m_models)
                     {
-                        if (model.Selected)
+                        if (model.State.Selected)
                         {
                             model.Transformation.Scale += l;
                         }
@@ -171,7 +171,7 @@ namespace Editor.Engine
                 Ray r = ic.GetPickRay(m_camera);
                 foreach(Models model in m_models)
                 {
-                    model.Selected = false;
+                    model.State.Selected = false;
                     foreach(ModelMesh mesh in model.Mesh.Meshes)
                     {
                         BoundingSphere s = mesh.BoundingSphere;
@@ -179,7 +179,7 @@ namespace Editor.Engine
                         float? f = r.Intersects(s);
                         if (f.HasValue)
                         {
-                            model.Selected = true;
+                            model.State.Selected = true;
                         }
                     }
                 }
@@ -227,7 +227,7 @@ namespace Editor.Engine
             string s = string.Empty;
             foreach(Models m in m_models)
             {
-                if (m.Selected)
+                if (m.State.Selected)
                 {
                     s += "\nModel: Pos: " + m.Transformation.Position.ToString() +
                         " Rot: " + m.Transformation.Rotation.ToString();

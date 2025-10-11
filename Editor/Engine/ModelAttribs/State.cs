@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Editor.Engine.ModelAttribs
 {
-    internal class State
+    public class State
     {
+        public bool Selected { get; set; }
     }
 }

@@ -31,6 +31,14 @@ namespace Editor.Engine
                 m_transformation = value;
             }
         }
+        public State State { get => m_state; 
+            set
+            {
+                OnPropertyChanged("Selected");
+                m_state = value;
+            }
+        }
+
         #region transformations
         //public Vector3 Position { get => m_position; 
         //    set
@@ -67,21 +75,20 @@ namespace Editor.Engine
         //    }
         //}
         #endregion transformations
-
-
-
-        public bool Selected
-        {
-            get => m_selected;
-            set
-            {
-                if (m_selected != value)
-                {
-                    m_selected = value;
-                    OnPropertyChanged("Selected");
-                }
-            }
-        }
+        #region state
+        //public bool Selected
+        //{
+        //    get => m_selected;
+        //    set
+        //    {
+        //        if (m_selected != value)
+        //        {
+        //            m_selected = value;
+        //            OnPropertyChanged("Selected");
+        //        }
+        //    }
+        //}
+        #endregion state
         // Texturing
         public Texture Texture
         {
@@ -104,9 +111,10 @@ namespace Editor.Engine
         //private Vector3 m_position;
         //private Vector3 m_rotation;
         //private float m_scale;
-        private bool m_selected;
+        //private bool m_selected;
         private Texture m_texture;
         private Transformation m_transformation;
+        private State m_state;
 
         public Models()
         {
@@ -115,6 +123,7 @@ namespace Editor.Engine
         public Models(ContentManager _content, string _model, string _texture, string _effect, Vector3 _position, float _scale)
         {
             m_transformation = new();
+            m_state = new();
             Create(_content, _model, _texture, _effect, _position, _scale);
         }
 
@@ -132,7 +141,7 @@ namespace Editor.Engine
             //Scale = _scale;
             m_transformation.Position = _position;
             m_transformation.Scale = _scale;
-            Selected = false;
+            m_state.Selected = false;
         }
 
         public void SetShader(Effect _effect)
@@ -186,7 +195,7 @@ namespace Editor.Engine
             Shader.Parameters["World"].SetValue(GetTransform());
             Shader.Parameters["WorldViewProjection"].SetValue(GetTransform() * _view * _projection);
             Shader.Parameters["Texture"].SetValue(Texture);
-            Shader.Parameters["Tint"].SetValue(Selected);
+            Shader.Parameters["Tint"].SetValue(State.Selected);
 
             foreach (ModelMesh mesh in Mesh.Meshes)
             {
