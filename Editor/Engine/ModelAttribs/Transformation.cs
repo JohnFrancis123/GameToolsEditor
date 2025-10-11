@@ -10,10 +10,16 @@ using System.ComponentModel;
 
 namespace Editor.Engine.ModelAttribs
 {
+    [TypeConverter(typeof(ExpandableObjectConverter))]
     public class Transformation
     {
         public Vector3 Position { get; set; }
         public Vector3 Rotation { get; set; }
         public float Scale { get; set; }
+
+        public override string ToString()
+        {
+            return "";
+        }
     }
 }

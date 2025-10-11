@@ -172,7 +172,7 @@ namespace Editor.Engine
                 foreach(Models model in m_models)
                 {
                     model.State.Selected = false;
-                    foreach(ModelMesh mesh in model.Mesh.Meshes)
+                    foreach(ModelMesh mesh in model.GetMesh().Meshes)
                     {
                         BoundingSphere s = mesh.BoundingSphere;
                         s = s.Transform(model.GetTransform());

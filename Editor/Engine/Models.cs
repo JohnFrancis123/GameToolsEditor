@@ -8,16 +8,18 @@ using Editor.Engine.ModelAttribs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+//using SharpDX.Direct2D1;
 using System.ComponentModel;
 using System.IO;
 
 namespace Editor.Engine
 {
+    //[TypeConverter(typeof(ExpandableObjectConverter))]
     class Models : ISerializable, INotifyPropertyChanged
     {
         // Accessors
-        public Model Mesh { get; set; }
-        public Effect Shader { get; set; }
+        //public Model Mesh { get; set; }
+        //public Effect Shader { get; set; }
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
@@ -101,18 +103,18 @@ namespace Editor.Engine
         }
 
         // Texturing
-        public Texture Texture
-        {
-            get => m_texture;
-            set
-            {
-                if (m_texture != value)
-                {
-                    m_texture = value;
-                    OnPropertyChanged("Texture");
-                }
-            }
-        }
+        //public Texture Texture
+        //{
+        //    get => m_texture;
+        //    set
+        //    {
+        //        if (m_texture != value)
+        //        {
+        //            m_texture = value;
+        //            OnPropertyChanged("Texture");
+        //        }
+        //    }
+        //}
 
         //event for property changes
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -123,10 +125,14 @@ namespace Editor.Engine
         //private Vector3 m_rotation;
         //private float m_scale;
         //private bool m_selected;
+        private Effect m_shader;
+        private Model m_mesh;
         private Texture m_texture;
         private Transformation m_transformation;
         private State m_state;
         private Appearance m_appearance;
+
+        public Model GetMesh() { return m_mesh; }
 
         public Models()
         {
@@ -137,9 +143,11 @@ namespace Editor.Engine
             m_transformation = new();
             m_state = new();
             m_appearance = new();
-            Appearance.DiffuseTexture.Add("Grass");
-            Appearance.DiffuseTexture.Add("HeightMap");
-            Appearance.DiffuseTexture.Add("Metal");
+
+            m_appearance.DiffuseTexture = new();
+            m_appearance.DiffuseTexture.Add("Grass");
+            m_appearance.DiffuseTexture.Add("HeightMap");
+            m_appearance.DiffuseTexture.Add("Metal");
 
             Create(_content, _model, _texture, _effect, _position, _scale);
         }
@@ -147,16 +155,16 @@ namespace Editor.Engine
         public void Create(ContentManager _content, string _model, string _texture, string _effect, Vector3 _position, float _scale) 
         {
             //m_transformation = new();
-            Mesh = _content.Load<Model>(_model);
-            Mesh.Tag = _model;
-            Texture = _content.Load<Texture>(_texture);
-            Texture.Tag = _texture;
+            m_mesh = _content.Load<Model>(_model);
+            m_mesh.Tag = _model;
+            m_texture = _content.Load<Texture>(_texture);
+            m_texture.Tag = _texture;
 
 
 
-            Shader = _content.Load<Effect>(_effect);
-            Shader.Tag = _effect;
-            SetShader(Shader);
+            m_shader = _content.Load<Effect>(_effect);
+            m_shader.Tag = _effect;
+            SetShader(m_shader);
             //m_position = _position;
             //Scale = _scale;
             m_transformation.Position = _position;
@@ -166,12 +174,12 @@ namespace Editor.Engine
 
         public void SetShader(Effect _effect)
         {
-            Shader = _effect;
-            foreach (ModelMesh mesh in Mesh.Meshes)
+            m_shader = _effect;
+            foreach (ModelMesh mesh in m_mesh.Meshes)
             {
                 foreach (ModelMeshPart meshPart in mesh.MeshParts)
                 {
-                    meshPart.Effect = Shader;
+                    meshPart.Effect = m_shader;
                 }
             }
         }
@@ -212,12 +220,12 @@ namespace Editor.Engine
             //m_position.X += 0.001f;
             //m_rotation.Y += 0.005f;
 
-            Shader.Parameters["World"].SetValue(GetTransform());
-            Shader.Parameters["WorldViewProjection"].SetValue(GetTransform() * _view * _projection);
-            Shader.Parameters["Texture"].SetValue(Texture);
-            Shader.Parameters["Tint"].SetValue(State.Selected);
+            m_shader.Parameters["World"].SetValue(GetTransform());
+            m_shader.Parameters["WorldViewProjection"].SetValue(GetTransform() * _view * _projection);
+            m_shader.Parameters["Texture"].SetValue(m_texture);
+            m_shader.Parameters["Tint"].SetValue(State.Selected);
 
-            foreach (ModelMesh mesh in Mesh.Meshes)
+            foreach (ModelMesh mesh in m_mesh.Meshes)
             {
                 mesh.Draw();
             }
@@ -225,9 +233,9 @@ namespace Editor.Engine
 
         public void Serialize(BinaryWriter _stream)
         {
-            _stream.Write(Mesh.Tag.ToString());
-            _stream.Write(Texture.Tag.ToString());
-            _stream.Write(Shader.Tag.ToString());
+            _stream.Write(m_mesh.Tag.ToString());
+            _stream.Write(m_texture.Tag.ToString());
+            _stream.Write(m_shader.Tag.ToString());
             HelpSerialize.Vec3(_stream, Transformation.Position);
             HelpSerialize.Vec3(_stream, Transformation.Rotation);
             _stream.Write(Transformation.Scale);
