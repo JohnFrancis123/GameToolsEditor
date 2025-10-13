@@ -20,25 +20,44 @@ namespace Editor.Engine
     public class Models : ISerializable, INotifyPropertyChanged
     {
         // Accessors
+        //private void ChangedProperty(object sender, PropertyChangedEventArgs e)
+        //{
+        //    if(sender is Transformation)
+        //    {
+        //        OnPropertyChanged("Transformation");
+        //    }
+        //    else if(sender is State)
+        //    {
+        //        OnPropertyChanged("Selected");
+        //    }
+        //    else if (sender is Appearance)
+        //    {
+        //        OnPropertyChanged("Appearance");
+        //    }
+        //}
+
+        //event for property changes
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public Transformation Transformation { 
             get => m_transformation; 
             set
             {
-                OnPropertyChanged("Transformation");
                 m_transformation = value;
+                OnPropertyChanged("Transformation");
             }
         }
         public State State { 
             get => m_state; 
             set
             {
-                OnPropertyChanged("Selected");
                 m_state = value;
+                OnPropertyChanged("Selected");
             }
         }
 
@@ -53,8 +72,7 @@ namespace Editor.Engine
             } 
         }
 
-        //event for property changes
-        public event PropertyChangedEventHandler? PropertyChanged;
+
 
 
 
