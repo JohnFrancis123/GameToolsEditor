@@ -112,13 +112,13 @@ namespace Editor.Editor
             if(sender is Models)
             {
                 //if a property is changed externally to the property grid, it's dirty.
-                //if(e.PropertyName == "Appearance")
-                //{
-                for (int i = 0; i < m_selected.Count; i++)
+                if(e.PropertyName == "Appearance")
                 {
-                    m_selected[i].UpdateTex(Content);
+                    for (int i = 0; i < m_selected.Count; i++)
+                    {
+                        m_selected[i].UpdateTex(Content);
+                    }
                 }
-                //}
 
                 if(e.PropertyName != "Selected")
                 {

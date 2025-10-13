@@ -157,17 +157,17 @@ namespace GUI.Editor //
 
         }
 
-        //private void PropertyGridValueChanged(object s, PropertyValueChangedEventArgs e)
-        //{
-        //    if (Game?.Project == null) return;
+        private void PropertyGridValueChanged(object s, PropertyValueChangedEventArgs e)
+        {
+            if (Game?.Project == null) return;
 
-        //    if(e.ChangedItem.Parent?.Label == "Appearance")
-        //    {
-        //        if(propertyGrid.SelectedObject is Models changedModel)
-        //        {
-        //            Game.HandleTexChange(changedModel);
-        //        }
-        //    }
-        //}
+            if (e.ChangedItem.Parent?.Label == "Appearance")
+            {
+                if (propertyGrid.SelectedObject is Models changedModel)
+                {
+                    Game.HandleTexChange(changedModel);
+                }
+            }
+        }
     }
 }
