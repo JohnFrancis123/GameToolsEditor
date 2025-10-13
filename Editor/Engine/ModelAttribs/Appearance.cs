@@ -4,16 +4,34 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections; // 🛑 NEW: Required for StandardValuesCollection
+using System.Collections;
+using System.Numerics; // 🛑 NEW: Required for StandardValuesCollection
 
 namespace Editor.Engine.ModelAttribs
 {
     [TypeConverter(typeof(ExpandableObjectConverter))]
-    public class Appearance
+    public class Appearance : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+
+        private string m_diffuseTexture = "Grass";
+
         //applying the nested TypeConverter to enable the dropdown behavior
         [TypeConverter(typeof(TextureNameConverter))]
-        public string DiffuseTexture { get; set; } = "Grass"; // Initialize with a default
+        public string DiffuseTexture { get => m_diffuseTexture; set 
+            {
+                if (m_diffuseTexture != value) {
+                    m_diffuseTexture = value;
+                    OnPropertyChanged("DiffuseTexture");
+                }
+            } 
+        } // Initialize with a default
 
         public override string ToString()
         {

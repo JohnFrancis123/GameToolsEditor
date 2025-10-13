@@ -8,9 +8,25 @@ using System.Threading.Tasks;
 namespace Editor.Engine.ModelAttribs
 {
     [TypeConverter(typeof(ExpandableObjectConverter))]
-    public class State
+    public class State : INotifyPropertyChanged
     {
-        public bool Selected { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private bool m_selected;
+        public bool Selected { get => m_selected;
+            set
+            {
+                if (m_selected != value) 
+                {
+                    m_selected = value;
+                    OnPropertyChanged("Selected");
+                }
+            }
+        }
 
         public override string ToString()
         {

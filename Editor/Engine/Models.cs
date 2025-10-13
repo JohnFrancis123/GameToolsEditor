@@ -20,21 +20,21 @@ namespace Editor.Engine
     public class Models : ISerializable, INotifyPropertyChanged
     {
         // Accessors
-        //private void ChangedProperty(object sender, PropertyChangedEventArgs e)
-        //{
-        //    if(sender is Transformation)
-        //    {
-        //        OnPropertyChanged("Transformation");
-        //    }
-        //    else if(sender is State)
-        //    {
-        //        OnPropertyChanged("Selected");
-        //    }
-        //    else if (sender is Appearance)
-        //    {
-        //        OnPropertyChanged("Appearance");
-        //    }
-        //}
+        private void ChangedProperty(object sender, PropertyChangedEventArgs e)
+        {
+            if (sender is Transformation)
+            {
+                OnPropertyChanged("Transformation");
+            }
+            else if (sender is State)
+            {
+                OnPropertyChanged("Selected");
+            }
+            else if (sender is Appearance)
+            {
+                OnPropertyChanged("Appearance");
+            }
+        }
 
         //event for property changes
         protected virtual void OnPropertyChanged(string propertyName)
@@ -48,7 +48,18 @@ namespace Editor.Engine
             get => m_transformation; 
             set
             {
-                m_transformation = value;
+                if (m_transformation != value) 
+                {
+                    //unsubscribing from old object
+                    if (m_transformation != null)
+                        m_transformation.PropertyChanged -= ChangedProperty;
+
+                    m_transformation = value;
+                    //resubscribing to new object
+                    if (m_transformation != null)
+                        m_transformation.PropertyChanged += ChangedProperty;
+
+                }
                 OnPropertyChanged("Transformation");
             }
         }
@@ -56,8 +67,17 @@ namespace Editor.Engine
             get => m_state; 
             set
             {
-                m_state = value;
-                OnPropertyChanged("Selected");
+                if (m_state != value)
+                {
+                    if (m_state != null)
+                        m_state.PropertyChanged -= ChangedProperty;
+                    
+                    m_state = value;
+
+                    if (m_state != null)
+                        m_state.PropertyChanged += ChangedProperty;
+                    OnPropertyChanged("Selected");
+                }
             }
         }
 
@@ -66,7 +86,14 @@ namespace Editor.Engine
             {
                 if (m_appearance != value)
                 {
+                    if (m_appearance != null)
+                        m_appearance.PropertyChanged -= ChangedProperty;
+
                     m_appearance = value;
+
+                    if (m_appearance != null)
+                        m_appearance.PropertyChanged += ChangedProperty;
+
                     OnPropertyChanged("Appearance");
                 }
             } 
@@ -97,21 +124,30 @@ namespace Editor.Engine
 
         public Models(ContentManager _content, string _model, string _texture, string _effect, Vector3 _position, float _scale)
         {
-            m_transformation = new();
-            m_state = new();
-            m_appearance = new();
-            m_textures = new();
-            //m_textures.Add("Grass");
-            //m_textures.Add("HeightMap");
-            //m_textures.Add("Metal");
-            m_appearance.DiffuseTexture = _texture;
+
 
             Create(_content, _model, _texture, _effect, _position, _scale);
         }
 
         public void Create(ContentManager _content, string _model, string _texture, string _effect, Vector3 _position, float _scale) 
         {
-            //m_transformation = new();
+            if(Transformation == null) 
+                m_transformation = new();
+            if (State == null)
+                m_state = new();
+            if(Appearance == null) 
+                m_appearance = new();
+
+            m_textures = new();
+
+            m_appearance.DiffuseTexture = _texture;
+
+            //having each attribute subscribe to its selected property
+            m_transformation.PropertyChanged += ChangedProperty;
+            m_state.PropertyChanged += ChangedProperty;
+            m_appearance.PropertyChanged += ChangedProperty;
+
+
             m_mesh = _content.Load<Model>(_model);
             m_mesh.Tag = _model;
 
@@ -153,7 +189,7 @@ namespace Editor.Engine
             Vector3 zeroVec = new Vector3(0, 0, 0);
             if (_translate == zeroVec) return;
 
-            OnPropertyChanged("Transformation");
+            //OnPropertyChanged("Transformation");
 
             float distance = Vector3.Distance(_camera.Target, _camera.Position);
             Vector3 forward = _camera.Target - _camera.Position;
@@ -172,14 +208,14 @@ namespace Editor.Engine
             Vector3 zeroVec = new Vector3(0, 0, 0);
             if (_rotate == zeroVec) return;
 
-            OnPropertyChanged("Transformation");
+            //OnPropertyChanged("Transformation");
             Transformation.Rotation += _rotate;
         }
 
         public void Scale(float _scale)
         {
             if (_scale == 0) return;
-            OnPropertyChanged("Transformation");
+            //OnPropertyChanged("Transformation");
             Transformation.Scale += _scale;
         }
 
@@ -219,13 +255,20 @@ namespace Editor.Engine
 
         public void Deserialize(BinaryReader _stream, ContentManager _content) 
         {
-            Transformation = new();
+            if(Transformation == null)
+                Transformation = new();
+
             string mesh = _stream.ReadString();
             string texture = _stream.ReadString();
             string shader = _stream.ReadString();
-            Transformation.Position = HelpDeserialize.Vec3(_stream);
-            Transformation.Rotation = HelpDeserialize.Vec3(_stream);
-            Transformation.Scale = _stream.ReadSingle();
+
+            Vector3 position = HelpDeserialize.Vec3(_stream);
+            Vector3 rotation = HelpDeserialize.Vec3(_stream);
+            float scale = _stream.ReadSingle();
+
+            Transformation.Position = position;
+            Transformation.Rotation = rotation;
+            Transformation.Scale = scale;
             Create(_content, mesh, texture, shader, Transformation.Position, Transformation.Scale);
         }
     }
