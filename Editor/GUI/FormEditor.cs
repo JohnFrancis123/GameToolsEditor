@@ -1,6 +1,8 @@
 ﻿using Editor.Editor;
 using Editor.Engine;
+using Editor.Engine.ModelAttribs;
 using Microsoft.Xna.Framework;
+using SharpDX.XAudio2;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -155,14 +157,17 @@ namespace GUI.Editor //
 
         }
 
-        //private void propertyGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
-        //{
-        //    if (Game == null || Game.Project == null) return;
-        //    INotifyPropertyChanged changed = (INotifyPropertyChanged)e.ChangedItem.Value;
-        //    if (changed != null)
-        //    { 
-        //        propertyGrid.AccessibilityObject.RaiseAutomationEvent(s);
-        //    }
-        //}
+        private void PropertyGridValueChanged(object s, PropertyValueChangedEventArgs e)
+        {
+            if (Game?.Project == null) return;
+
+            if(e.ChangedItem.Parent?.Label == "Appearance")
+            {
+                if(propertyGrid.SelectedObject is Models changedModel)
+                {
+                    Game.HandleTexChange(changedModel);
+                }
+            }
+        }
     }
 }

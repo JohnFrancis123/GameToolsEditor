@@ -7,7 +7,6 @@ using GUI.Editor;
 using System;
 using System.ComponentModel;
 using Editor.Engine;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace Editor.Editor
@@ -21,88 +20,17 @@ namespace Editor.Editor
         private SpriteBatch m_spriteBatch;
         private FontController m_fonts;
 
+        private List<Models> m_selected; //sorry guys, had to use AI for this one.
+
         RasterizerState m_rasterState = new RasterizerState();
         DepthStencilState m_depthStencilState = new DepthStencilState();
 
         private bool m_dirty;
 
-        private Models[] m_selected = Array.Empty<Models>();
-
-        private void UpdateSelectionAndModels(Models[] selection)
-        {
-            // --- 1. Unsubscribe from the OLD selection ---
-            foreach (var model in m_selected)
-            {
-                // CORRECT: Remove handler from old selection
-                model.PropertyChanged -= OnModelPropertyChanged;
-            }
-
-            // --- 2. Update the PropertyGrid selection (LOGIC FIX) ---
-            if (selection == null || selection.Length == 0)
-            {
-                // Case: No selection
-                m_parent.propertyGrid.SelectedObject = null;
-            }
-            else if (selection.Length == 1)
-            {
-                // Case: Single selection
-                m_parent.propertyGrid.SelectedObject = selection[0];
-            }
-            else // selection.Length > 1
-            {
-                // Case: Multiple selection (Requires SelectedObjects and an object array)
-                // You MUST use SelectedObjects for multiple items.
-                m_parent.propertyGrid.SelectedObjects = selection.Cast<object>().ToArray();
-            }
-
-            // --- 3. Subscribe to the NEW selection (SUBSCRIPTION FIX) ---
-            foreach (var model in selection)
-            {
-                // FIX: You must ADD the handler to the new selection.
-                model.PropertyChanged += OnModelPropertyChanged;
-            }
-
-            // 🛑 FIX: SET the dirty flag because a change in selection requires a UI update.
-            m_dirty = true;
-
-            // --- 4. Store the new selection for the next cycle ---
-            m_selected = selection;
-        }
-
-        private void OnModelPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            //checking if on the wrong thread (MonoGame thread).
-            if (m_parent.propertyGrid.InvokeRequired)
-            {
-                //calling back to the UI thread.
-                m_parent.propertyGrid.Invoke(new Action<object, PropertyChangedEventArgs>(OnModelPropertyChanged),
-                                             sender,
-                                             e);
-                return;
-            }
-
-            //execution continues here ONLY on the safe UI thread
-
-            // 🛑 FIX: SET the dirty flag for any property change that requires a UI update.
-            if (sender is Models)
-            {
-                // Property change (non-selection)
-                if (e.PropertyName != "Selected")
-                {
-                    m_dirty = true;
-                }
-                // Selection change
-                else if (e.PropertyName == "Selected")
-                {
-                    m_dirty = true;
-                }
-            }
-
-            // The direct m_parent.propertyGrid.Refresh() call is removed here.
-        }
-
         public GameEditor()
         {
+            m_selected = new();
+
             m_graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -135,10 +63,82 @@ namespace Editor.Editor
 
         protected override void LoadContent()
         {
-            m_spriteBatch = new SpriteBatch(GraphicsDevice); ;
+            m_spriteBatch = new SpriteBatch(GraphicsDevice);
             m_fonts = new();
             m_fonts.LoadContent(Content);
         }
+
+        private void UpdSelectionAndModels(List<Models> selection)
+        {
+            //unsubscribing from the models
+            foreach (Models model in m_selected) 
+            {
+                model.PropertyChanged -= OnPropertyChanged;
+            }
+
+            if (selection.Count == 0)
+            {
+                m_parent.propertyGrid.SelectedObject = null;
+                m_dirty = true;
+            }
+            else if (selection.Count > 1 && m_dirty)
+            {
+                m_parent.propertyGrid.SelectedObjects = selection.ToArray();
+                m_dirty = false;
+            }
+            else if (selection.Count == 1 && m_dirty)
+            {
+                m_parent.propertyGrid.SelectedObject = selection[0];
+                m_dirty = false;
+            }
+
+            foreach(var model in m_selected)
+            {
+                model.PropertyChanged += OnPropertyChanged;
+            }
+
+            m_selected = selection;
+
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (m_parent.propertyGrid.InvokeRequired)
+            {
+                m_parent.propertyGrid.Invoke(new Action<object, PropertyChangedEventArgs>(OnPropertyChanged), sender, e);
+                return;
+            }
+
+            if(sender is Models)
+            {
+                //if a property is changed externally to the property grid, it's dirty.
+                if(e.PropertyName == "Appearance")
+                {
+                    for (int i = 0; i < m_selected.Count; i++)
+                    {
+                        m_selected[i].UpdateTex(Content);
+                    }
+                }
+
+                if(e.PropertyName != "Selected")
+                {
+                    m_dirty = true;
+                }
+            }
+        }
+
+        //can be called on the FormEditor thread
+        public void HandleTexChange(Models model)
+        {
+            if (m_parent.propertyGrid.InvokeRequired)
+            {
+                m_parent.propertyGrid.Invoke(new Action<Models>(HandleTexChange), model);
+                return;
+            }
+            model.UpdateTex(Content);
+            m_dirty = true;
+        }
+
 
         //setting the selected property of the property grid every tick
         protected override void Update(GameTime _gameTime)
@@ -147,43 +147,16 @@ namespace Editor.Editor
             {
                 Project.Update((float)(_gameTime.ElapsedGameTime.TotalMilliseconds / 1000));
                 InputController.Instance.Clear();
+                //
+                //if(!m_selected.SequenceEqual(models))
+                var models = Project.CurrentLevel.GetSelectedModels();
 
-                var models = Project.CurrentLevel.GetSelectedModels().ToArray();
-
-                if (!m_selected.SequenceEqual(models))
-                {
-                    UpdateSelectionAndModels(models);
-                }
-
-                // 🛑 FIX: Check the dirty flag and force the Property Grid update via Invoke.
-                if (m_dirty)
-                {
-                    // We must Invoke because the Update method is on the MonoGame thread.
-                    if (m_parent.propertyGrid.InvokeRequired)
-                    {
-                        m_parent.propertyGrid.Invoke(new Action(PropertyGridUpdateAndClear));
-                    }
-                    else
-                    {
-                        // Fallback for execution on the same thread (unlikely).
-                        PropertyGridUpdateAndClear();
-                    }
-                }
+                UpdSelectionAndModels(models);
+                
             }
+
             base.Update(_gameTime);
-        }
-        private void PropertyGridUpdateAndClear()
-        {
-            // Double-check the flag state before acting
-            if (m_dirty)
-            {
-                // 🛑 ACT: Tell the Property Grid to update its displayed values.
-                m_parent.propertyGrid.Refresh();
-
-                // 🛑 CLEAR: Reset the dirty flag immediately after the action.
-                m_dirty = false;
-            }
-        }
+        } //
 
         private void HandleSelections()
         {
@@ -205,12 +178,12 @@ namespace Editor.Editor
                 m_spriteBatch.End();
             }
 
-            base.Draw(gameTime); 
+            base.Draw(gameTime);
         }
 
         public void AdjustAspectRatio()
         {
-            if(Project == null) return;
+            if (Project == null) return;
             Camera c = Project.CurrentLevel.GetCamera();
             c.Viewport = m_graphics.GraphicsDevice.Viewport;
             c.Update(c.Position, m_graphics.GraphicsDevice.Viewport.AspectRatio);

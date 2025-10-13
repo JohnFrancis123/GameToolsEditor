@@ -17,7 +17,7 @@ using System.IO;
 namespace Editor.Engine
 {
     //[TypeConverter(typeof(ExpandableObjectConverter))]
-    class Models : ISerializable, INotifyPropertyChanged
+    public class Models : ISerializable, INotifyPropertyChanged
     {
         // Accessors
         protected virtual void OnPropertyChanged(string propertyName)
@@ -96,10 +96,11 @@ namespace Editor.Engine
             //m_transformation = new();
             m_mesh = _content.Load<Model>(_model);
             m_mesh.Tag = _model;
+
+
             m_texture = _content.Load<Texture>(_texture);
+            Appearance.DiffuseTexture = _texture;
             m_texture.Tag = _texture;
-
-
 
             m_shader = _content.Load<Effect>(_effect);
             m_shader.Tag = _effect;
@@ -113,7 +114,8 @@ namespace Editor.Engine
 
         public void UpdateTex(ContentManager _content)
         {
-            m_texture = _content.Load<Texture>(m_texture.Tag.ToString());
+            string texName = Appearance.DiffuseTexture;
+            m_texture = _content.Load<Texture>(texName); ;
         }
 
         public void SetShader(Effect _effect)
