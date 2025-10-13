@@ -20,7 +20,7 @@ namespace Editor.Editor
         private SpriteBatch m_spriteBatch;
         private FontController m_fonts;
 
-        private List<Models> m_selected; //sorry guys, had to use AI for this one.
+        private List<Models> m_selected; 
 
         RasterizerState m_rasterState = new RasterizerState();
         DepthStencilState m_depthStencilState = new DepthStencilState();
@@ -112,13 +112,13 @@ namespace Editor.Editor
             if(sender is Models)
             {
                 //if a property is changed externally to the property grid, it's dirty.
-                if(e.PropertyName == "Appearance")
+                //if(e.PropertyName == "Appearance")
+                //{
+                for (int i = 0; i < m_selected.Count; i++)
                 {
-                    for (int i = 0; i < m_selected.Count; i++)
-                    {
-                        m_selected[i].UpdateTex(Content);
-                    }
+                    m_selected[i].UpdateTex(Content);
                 }
+                //}
 
                 if(e.PropertyName != "Selected")
                 {

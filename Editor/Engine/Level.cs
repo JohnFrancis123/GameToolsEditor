@@ -189,6 +189,8 @@ namespace Editor.Engine
             }
         }
 
+        public void HandleTex(ContentManager _content, string _name) { }
+
         //The root issue is here. We update EVERY SINGLE FRAME.
         public void Update(float _delta)
         {
@@ -198,6 +200,8 @@ namespace Editor.Engine
             HandleTranslate();
             HandleRotate(_delta);
             HandleScale(_delta);
+            //if(_content != null && _name != null) HandleTex(_content, _name);
+
             ///
             //we can use HandlePick every frame, AS LONG AS it does not change the values each frame.
             HandlePick();
