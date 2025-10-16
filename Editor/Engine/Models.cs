@@ -169,7 +169,7 @@ namespace Editor.Engine
         public void UpdateTex(ContentManager _content)
         {
             string texName = Appearance.DiffuseTexture;
-            m_texture = _content.Load<Texture>(texName); ;
+            m_texture = _content.Load<Texture>(texName);
         }
 
         public void SetShader(Effect _effect)
@@ -205,8 +205,8 @@ namespace Editor.Engine
 
         public void Rotate(Vector3 _rotate)
         {
-            Vector3 zeroVec = new Vector3(0, 0, 0);
-            if (_rotate == zeroVec) return;
+            //Vector3 zeroVec = new Vector3(0, 0, 0);
+            if (_rotate == Vector3.Zero) return;
 
             //OnPropertyChanged("Transformation");
             Transformation.Rotation += _rotate;
@@ -236,6 +236,8 @@ namespace Editor.Engine
             m_shader.Parameters["WorldViewProjection"].SetValue(GetTransform() * _view * _projection);
             m_shader.Parameters["Texture"].SetValue(m_texture);
             m_shader.Parameters["Tint"].SetValue(State.Selected);
+
+
 
             foreach (ModelMesh mesh in m_mesh.Meshes)
             {

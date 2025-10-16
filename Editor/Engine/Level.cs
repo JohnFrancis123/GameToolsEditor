@@ -19,7 +19,7 @@ namespace Editor.Engine
 
         // Members
         private List<Models> m_models = new();
-        private Camera m_camera = new(new Vector3(0, 2, 2), 16.0f / 9.0f); //my resolution is 16x10f
+        private Camera m_camera = new(new Vector3(0.0f, 0.0f, -20.0f), 16.0f / 9.0f); //my resolution is 16x10f
 
         public Level()
         {
@@ -27,11 +27,8 @@ namespace Editor.Engine
 
         public void LoadContent(ContentManager _content)
         {
-            Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 1.0f);
-            //teapot.SetShader(_content.Load<Effect>("MyShader"));
+            Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 15.0f);
             AddModel(teapot);
-            //teapot = new(_content, "obj/Teapot", "Metal", "MyShader", new Vector3(1, 0, 0), 1.0f);
-            //AddModel(teapot);
         }
 
         public void AddModel(Models _model)
@@ -131,9 +128,9 @@ namespace Editor.Engine
                         if (model.State.Selected)
                         {
                             modelRotated = true;
-                            model.Rotate(movement);
+                            //model.Rotate(movement);
 
-                            //model.Transformation.Rotation += movement;
+                            model.Transformation.Rotation += movement;
                         }
                         if (!modelRotated)
                         {

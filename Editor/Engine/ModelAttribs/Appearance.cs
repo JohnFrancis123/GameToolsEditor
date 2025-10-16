@@ -20,7 +20,7 @@ namespace Editor.Engine.ModelAttribs
 
 
 
-        private string m_diffuseTexture = "Grass";
+        private string m_diffuseTexture = "Metal";
 
         //applying the nested TypeConverter to enable the dropdown behavior
         [TypeConverter(typeof(TextureNameConverter))]

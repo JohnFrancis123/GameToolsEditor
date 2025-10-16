@@ -18,6 +18,11 @@ texture Texture;
 sampler BasicTextureSampler = sampler_state
 {
     texture = <Texture>;
+    MinFilter = Anisotropic; // Minification Filter
+    MagFilter = Linear; // Magnification Filter
+    MipFilter = Linear; // Mip-mapping
+    AddressU = Wrap; // Address Mode for U Coordinates
+    AddressV = Wrap; // Address Mode for V Coordinates
 };
 
 struct VertexShaderInput //the types we will send to the shader

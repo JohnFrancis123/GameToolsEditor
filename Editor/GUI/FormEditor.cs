@@ -161,13 +161,13 @@ namespace GUI.Editor //
         {
             if (Game?.Project == null) return;
 
-            if (e.ChangedItem.Parent?.Label == "Appearance")
-            {
-                if (propertyGrid.SelectedObject is Models changedModel)
-                {
-                    Game.HandleTexChange(changedModel);
-                }
-            }
+            //if (e.ChangedItem.Parent?.Label == "Appearance")
+            //{
+            //    if (propertyGrid.SelectedObject is Models changedModel)
+            //    {
+            //        Game.HandleTexChange(changedModel);
+            //    }
+            //}
         }
     }
 }

@@ -19,6 +19,7 @@ namespace Editor.Editor
         private FormEditor m_parent;
         private SpriteBatch m_spriteBatch;
         private FontController m_fonts;
+        //private VertexBuffer m_vertexBuffer;
 
         private List<Models> m_selected; 
 
@@ -81,7 +82,7 @@ namespace Editor.Editor
                 m_parent.propertyGrid.SelectedObject = null;
                 m_dirty = true;
             }
-            else if (selection.Count > 1 && m_dirty)
+            else if (selection.Count > 1 && m_dirty) 
             {
                 m_parent.propertyGrid.SelectedObjects = selection.ToArray();
                 m_dirty = false;
@@ -111,7 +112,6 @@ namespace Editor.Editor
 
             if(sender is Models)
             {
-                //if a property is changed externally to the property grid, it's dirty.
                 if(e.PropertyName == "Appearance")
                 {
                     for (int i = 0; i < m_selected.Count; i++)
@@ -119,8 +119,8 @@ namespace Editor.Editor
                         m_selected[i].UpdateTex(Content);
                     }
                 }
-
-                if(e.PropertyName != "Selected")
+                //if a property is changed externally to the property grid, it's dirty.
+                if (e.PropertyName != "Selected")
                 {
                     m_dirty = true;
                 }
