@@ -127,18 +127,6 @@ namespace Editor.Editor
             }
         }
 
-        //can be called on the FormEditor thread
-        public void HandleTexChange(Models model)
-        {
-            if (m_parent.propertyGrid.InvokeRequired)
-            {
-                m_parent.propertyGrid.Invoke(new Action<Models>(HandleTexChange), model);
-                return;
-            }
-            model.UpdateTex(Content);
-            m_dirty = true;
-        }
-
 
         //setting the selected property of the property grid every tick
         protected override void Update(GameTime _gameTime)

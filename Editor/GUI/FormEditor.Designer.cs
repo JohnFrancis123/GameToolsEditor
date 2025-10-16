@@ -149,7 +149,6 @@
             propertyGrid.Size = new System.Drawing.Size(257, 457);
             propertyGrid.TabIndex = 0;
             propertyGrid.Click += propertyGrid_Click;
-            propertyGrid.PropertyValueChanged += PropertyGridValueChanged;
             // 
             // FormEditor
             // 

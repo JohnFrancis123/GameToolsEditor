@@ -186,7 +186,7 @@ namespace Editor.Engine
             }
         }
 
-        public void HandleTex(ContentManager _content, string _name) { }
+        //public void HandleTex(ContentManager _content, string _name) { }
 
         //The root issue is here. We update EVERY SINGLE FRAME.
         public void Update(float _delta)
