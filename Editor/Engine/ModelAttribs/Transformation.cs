@@ -15,9 +15,9 @@ namespace Editor.Engine.ModelAttribs
     {
 
         public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
+        protected virtual void OnPropertyChanged(string _propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(_propertyName));
         }
 
         private Vector3 m_position = Vector3.Zero;

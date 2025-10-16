@@ -128,8 +128,6 @@ namespace Editor.Engine
                         if (model.State.Selected)
                         {
                             modelRotated = true;
-                            //model.Rotate(movement);
-
                             model.Transformation.Rotation += movement;
                         }
                         if (!modelRotated)
@@ -154,8 +152,7 @@ namespace Editor.Engine
                     {
                         if (model.State.Selected)
                         {
-                            model.Scale(l);
-                            //model.Transformation.Scale += l;
+                            model.Transformation.Scale += l;
                         }
                     }
                 }

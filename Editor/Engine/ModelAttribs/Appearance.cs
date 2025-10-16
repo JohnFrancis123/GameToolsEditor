@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections;
-using System.Numerics; // 🛑 NEW: Required for StandardValuesCollection
+using System.Numerics;
 
 namespace Editor.Engine.ModelAttribs
 {
@@ -13,25 +13,25 @@ namespace Editor.Engine.ModelAttribs
     public class Appearance : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged(string propertyName)
+        protected virtual void OnPropertyChanged(string _propertyName)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(_propertyName));
         }
-
-
-
-        private string m_diffuseTexture = "Metal";
 
         //applying the nested TypeConverter to enable the dropdown behavior
         [TypeConverter(typeof(TextureNameConverter))]
-        public string DiffuseTexture { get => m_diffuseTexture; set 
+        public string DiffuseTexture { get => m_diffuseTexture; 
+            set 
             {
                 if (m_diffuseTexture != value) {
                     m_diffuseTexture = value;
                     OnPropertyChanged("DiffuseTexture");
                 }
-            } 
-        } // Initialize with a default
+            }
+        }
+
+        private string m_diffuseTexture;
+
 
         public override string ToString()
         {

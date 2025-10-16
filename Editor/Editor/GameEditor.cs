@@ -55,10 +55,6 @@ namespace Editor.Editor
 
         protected override void Initialize()
         {
-            //RasterizerState state = new RasterizerState();
-            //state.CullMode = CullMode.None;
-            //GraphicsDevice.RasterizerState = state;
-
             base.Initialize();
         }
 
@@ -144,12 +140,7 @@ namespace Editor.Editor
             }
 
             base.Update(_gameTime);
-        } //
-
-        private void HandleSelections()
-        {
-
-        }
+        } 
 
         protected override void Draw(GameTime gameTime)
         {
