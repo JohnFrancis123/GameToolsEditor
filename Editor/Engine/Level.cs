@@ -28,11 +28,7 @@ namespace Editor.Engine
         {
             m_terrainEffect = _content.Load<Effect>("TerrainEffect");
             m_terrain = new(_content.Load<Texture2D>("JohnFrancisHeightMap"), _content.Load<Texture2D>("zuck"), 200, _device);
-            //Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 1.0f);
-            ////teapot.SetShader(_content.Load<Effect>("MyShader"));
-            //AddModel(teapot);
-            //teapot = new(_content, "obj/Teapot", "Metal", "MyShader", new Vector3(1, 0, 0), 1.0f);
-            //AddModel(teapot);
+
         }
 
         public void AddModel(Models _model)
@@ -40,13 +36,14 @@ namespace Editor.Engine
             m_models.Add(_model);
         }
 
-        public List<Models> GetSelectedModels()
+        public List<ISelectable> GetSelectedModels()
         {
-            List<Models> models = new List<Models>();
+            List<ISelectable> models = new List<ISelectable>();
             foreach(var model in m_models)
             {
                 if (model.Selected) models.Add(model);
             }
+            if (m_terrain.Selected) models.Add(m_terrain);
             return models;
         }
         public void Render()
@@ -150,6 +147,8 @@ namespace Editor.Engine
         }
 
         private void HandlePick() {
+            float? f;
+            Matrix transform = Matrix.Identity;
             InputController ic = InputController.Instance;
             if (ic.IsButtonDown(MouseButtons.Left))
             {
@@ -157,13 +156,12 @@ namespace Editor.Engine
                 foreach(Models model in m_models)
                 {
                     model.Selected = false;
-                    Matrix transform = model.GetTransform();
+                    transform = model.GetTransform();
                     foreach(ModelMesh mesh in model.Mesh.Meshes)
                     {
                         BoundingSphere s = mesh.BoundingSphere;
                         s.Transform(ref transform, out s);
-                        s = s.Transform(model.GetTransform());
-                        float? f = r.Intersects(s);
+                        f = r.Intersects(s);
                         if (f.HasValue)
                         {
                             f = HelpMath.PickTriangle(in mesh, ref r, ref transform);
@@ -173,6 +171,16 @@ namespace Editor.Engine
                             }
                         }
                     }
+                }
+
+                // Check Terrain
+                transform = Matrix.Identity;
+                f = HelpMath.PickTriangle(in m_terrain, ref r, ref transform);
+
+                m_terrain.Selected = false;
+                if(f.HasValue)
+                {
+                    m_terrain.Selected = true;
                 }
             }
         }

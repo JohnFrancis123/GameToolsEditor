@@ -110,6 +110,34 @@ namespace Editor.Engine
             result = rayDistance;
         }
 
+        public static float? PickTriangle(in Terrain _terrain, ref Ray _ray, ref Matrix _transform)
+        {
+            Vector3 pos1 = new(); Vector3 pos2 = new(); Vector3 pos3 = new();
+
+            for (int i = 0; i < _terrain.Indices.Length; i += 3)
+            {
+                int index = _terrain.Indices[i];
+                pos1 = _terrain.Vertices[index].Position;
+                Vector3.Transform(ref pos1, ref _transform, out pos1);
+
+                index = _terrain.Indices[i + 1];
+                pos2 = _terrain.Vertices[index].Position;
+                Vector3.Transform(ref pos2, ref _transform, out pos2);
+
+                index = _terrain.Indices[i + 2];
+                pos3 = _terrain.Vertices[index].Position;
+                Vector3.Transform(ref pos3, ref _transform, out pos3);
+
+                RayIntersectsTriangle(ref _ray, ref pos1, ref pos2, ref pos3, out float? res);
+                if (res.HasValue)
+                {
+                    return res;
+                }
+            }
+
+            return null;
+        }
+
         public static float? PickTriangle(in ModelMesh _mesh, ref Ray _ray, ref Matrix _transform)
         {
             Vector3 pos1 = new(); Vector3 pos2 = new(); Vector3 pos3 = new();
