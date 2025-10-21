@@ -27,7 +27,7 @@ namespace Editor.Engine
         public void LoadContent(GraphicsDevice _device, ContentManager _content)
         {
             m_terrainEffect = _content.Load<Effect>("TerrainEffect");
-            m_terrain = new(_content.Load<Texture2D>("HeightMap"), _content.Load<Texture2D>("Grass"), 200, _device);
+            m_terrain = new(_content.Load<Texture2D>("JohnFrancisHeightMap"), _content.Load<Texture2D>("zuck"), 200, _device);
             //Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 1.0f);
             ////teapot.SetShader(_content.Load<Effect>("MyShader"));
             //AddModel(teapot);

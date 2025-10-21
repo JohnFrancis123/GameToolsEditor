@@ -58,6 +58,18 @@
 /processorParam:TextureFormat=Color
 /build:HeightMap.jpg
 
+#begin JohnFrancisHeightMap.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:JohnFrancisHeightMap.jpg
+
 #begin Metal.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -100,4 +112,16 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:TerrainEffect.fx
+
+#begin zuck.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:zuck.jpg
 
