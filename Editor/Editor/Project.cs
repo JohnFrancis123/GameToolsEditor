@@ -1,5 +1,6 @@
 ﻿//using Editor.Engine; //Editor.Engine? Wtf???
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using Editor.Engine.Interfaces;
 using Editor.Engine;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
         {
         }
 
-        public Project(ContentManager _content, string _name)
+        public Project(GraphicsDevice _device, ContentManager _content, string _name)
         {
             Folder = Path.GetDirectoryName(_name);
             Name = Path.GetFileName(_name);
@@ -28,13 +29,13 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
             }
 
             // Add a default level
-            AddLevel(_content);
+            AddLevel(_device, _content);
         }
 
-        public void AddLevel(ContentManager _content) 
+        public void AddLevel(GraphicsDevice _device, ContentManager _content) 
         {
             CurrentLevel = new();
-            CurrentLevel.LoadContent(_content);
+            CurrentLevel.LoadContent(_device, _content);
             Levels.Add(CurrentLevel);
         }
 

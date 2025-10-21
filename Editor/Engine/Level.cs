@@ -17,18 +17,22 @@ namespace Editor.Engine
         // Members
         private List<Models> m_models = new();
         private Camera m_camera = new(new Vector3(0, 2, 2), 16.0f / 9.0f); //my resolution is 16x10
+        private Effect m_terrainEffect = null;
+        private Terrain m_terrain = null;
 
         public Level()
         {
         }
 
-        public void LoadContent(ContentManager _content)
+        public void LoadContent(GraphicsDevice _device, ContentManager _content)
         {
-            Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 1.0f);
-            //teapot.SetShader(_content.Load<Effect>("MyShader"));
-            AddModel(teapot);
-            teapot = new(_content, "obj/Teapot", "Metal", "MyShader", new Vector3(1, 0, 0), 1.0f);
-            AddModel(teapot);
+            m_terrainEffect = _content.Load<Effect>("TerrainEffect");
+            m_terrain = new(_content.Load<Texture2D>("HeightMap"), _content.Load<Texture2D>("Grass"), 200, _device);
+            //Models teapot = new(_content, "obj/Teapot", "Metal", "MyShader", Vector3.Zero, 1.0f);
+            ////teapot.SetShader(_content.Load<Effect>("MyShader"));
+            //AddModel(teapot);
+            //teapot = new(_content, "obj/Teapot", "Metal", "MyShader", new Vector3(1, 0, 0), 1.0f);
+            //AddModel(teapot);
         }
 
         public void AddModel(Models _model)
@@ -51,6 +55,7 @@ namespace Editor.Engine
             {
                 m.Render(m_camera.View, m_camera.Projection);
             }
+            m_terrain.Draw(m_terrainEffect, m_camera.View, m_camera.Projection);
         }
 
         private void HandleTranslate()
