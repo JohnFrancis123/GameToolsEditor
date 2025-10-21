@@ -148,18 +148,24 @@ namespace Editor.Engine
             InputController ic = InputController.Instance;
             if (ic.IsButtonDown(MouseButtons.Left))
             {
-                Ray r = ic.GetPickRay(m_camera);
+                Ray r = HelpMath.GetPickRay(ic.MousePosition, m_camera);
                 foreach(Models model in m_models)
                 {
                     model.Selected = false;
+                    Matrix transform = model.GetTransform();
                     foreach(ModelMesh mesh in model.Mesh.Meshes)
                     {
                         BoundingSphere s = mesh.BoundingSphere;
+                        s.Transform(ref transform, out s);
                         s = s.Transform(model.GetTransform());
                         float? f = r.Intersects(s);
                         if (f.HasValue)
                         {
-                            model.Selected = true;
+                            f = HelpMath.PickTriangle(in mesh, ref r, ref transform);
+                            if (f.HasValue)
+                            {
+                                model.Selected = true;
+                            }
                         }
                     }
                 }

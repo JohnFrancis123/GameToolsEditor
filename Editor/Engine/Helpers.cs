@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 
 namespace Editor.Engine
@@ -76,7 +77,7 @@ namespace Editor.Engine
             float inverseDeterminant = 1.0f / determinant;
 
             // Make sure it is inside the triangle.
-            if(triangleU < 0 || triangleU > 1)
+            if (triangleU < 0 || triangleU > 1)
             {
                 result = null;
                 return;
@@ -87,7 +88,7 @@ namespace Editor.Engine
             Vector3.Dot(ref ray.Direction, ref distanceCrossEdge1, out float triangleV);
 
             // Make sure it is inside the triangle.
-            if(triangleV < 0 || triangleU + triangleV > 1)
+            if (triangleV < 0 || triangleU + triangleV > 1)
             {
                 result = null;
                 return;
@@ -98,7 +99,7 @@ namespace Editor.Engine
             rayDistance *= inverseDeterminant;
 
             // Is the triangle behind the ray origin?
-            if(rayDistance < 0)
+            if (rayDistance < 0)
             {
                 result = null;
                 return;
@@ -107,5 +108,41 @@ namespace Editor.Engine
             result = rayDistance;
         }
 
+        public static float? PickTriangle(in ModelMesh _mesh, ref Ray _ray, ref Matrix _transform)
+        {
+            Vector3 pos1 = new(); Vector3 pos2 = new(); Vector3 pos3 = new();
+
+            foreach(var part in _mesh.MeshParts)
+            {
+                int stride = part.VertexBuffer.VertexDeclaration.VertexStride / 4;
+                var indices = new short[part.IndexBuffer.IndexCount];
+                part.IndexBuffer.GetData<short>(indices);
+                var vertices = new float[part.VertexBuffer.VertexCount * stride];
+                part.VertexBuffer.GetData<float>(vertices);
+
+                //Usually first three floats are position
+                for (int i = part.StartIndex; i < part.StartIndex + part.PrimitiveCount * 3; i += 3)
+                {
+                    int index = (part.VertexOffset + indices[i]) * stride;
+                    pos1.X = vertices[index]; pos1.Y = vertices[index + 1]; pos1.Z = vertices[index + 2];
+                    Vector3.Transform(ref pos1, ref _transform, out pos1);
+
+                    index = (part.VertexOffset + indices[i + 1]) * stride;
+                    pos2.X = vertices[index]; pos2.Y = vertices[index + 1]; pos2.Z = vertices[index + 2];
+                    Vector3.Transform(ref pos2, ref _transform, out pos2);
+
+                    index = (part.VertexOffset + indices[i + 2]) * stride;
+                    pos3.X = vertices[index]; pos3.Y = vertices[index + 1]; pos3.Z = vertices[index + 2];
+                    Vector3.Transform(ref pos3, ref _transform, out pos3);
+
+                    RayIntersectsTriangle(ref _ray, ref pos1, ref pos2, ref pos3, out float? res);
+                    if (res.HasValue)
+                    {
+                        return res;
+                    }
+                }
+            }
+            return null;
+        }
 
 }
