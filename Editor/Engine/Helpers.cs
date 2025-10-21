@@ -23,4 +23,89 @@ namespace Editor.Engine
             return v;
         }
     }
+
+    internal class HelpMath
+    {
+        public static Ray GetPickRay(Vector2 _mousePosition, Camera _camera)
+        {
+            Vector3 nearPoint = new Vector3(_mousePosition, 0);
+            Vector3 farPoint = new Vector3(_mousePosition, 1);
+
+            nearPoint = _camera.Viewport.Unproject(nearPoint, _camera.Projection, _camera.View, Matrix.Identity);
+            farPoint = _camera.Viewport.Unproject(farPoint, _camera.Projection, _camera.View, Matrix.Identity);
+
+            Vector3 direction = farPoint - nearPoint;
+            direction.Normalize();
+
+            return new Ray(nearPoint, direction);
+        }
+
+        /// <summary>
+        /// checks if a ray intersects with a triangle.
+        /// Implemented using pasas by reference versions of the MonoGame
+        /// math functions. Using tehse overloads is generally not recommended,
+        /// because they make the code less readable than the normal pass by value
+        /// versions. This method can be callaed very frequently in a tight inner loop,
+        /// however, so in this particular case the performance benefits from passing
+        /// everything by reference outweigh the loss of readability.
+        /// </summary>
+
+        public static void RayIntersectsTriangle(ref Ray ray,
+                                             ref Vector3 vertex1,
+                                             ref Vector3 vertex2,
+                                             ref Vector3 vertex3, out float? result)
+        {
+            // Compute vectors along two edges of the triangke.
+            Vector3.Subtract(ref vertex2, ref vertex1, out Vector3 edge1);
+            Vector3.Subtract(ref vertex3, ref vertex1, out Vector3 edge2);
+
+            // Compute the determinant.
+            Vector3.Cross(ref ray.Direction, ref edge2, out Vector3 directionCrossEdge2);
+            Vector3.Dot(ref edge1, ref directionCrossEdge2, out float determinant);
+
+            // If the ray is parallel to the triangle plane, there is no collision.
+            if (determinant > -float.Epsilon && determinant < float.Epsilon)
+            {
+                result = null;
+                return;
+            }
+
+            // Calculate the U parameter of the intersection point.
+            Vector3.Subtract(ref ray.Position, ref vertex1, out Vector3 distanceVector);
+            Vector3.Dot(ref distanceVector, ref directionCrossEdge2, out float triangleU);
+            float inverseDeterminant = 1.0f / determinant;
+
+            // Make sure it is inside the triangle.
+            if(triangleU < 0 || triangleU > 1)
+            {
+                result = null;
+                return;
+            }
+
+            // Calculate the V parameter of the intersection point.
+            Vector3.Cross(ref distanceVector, ref edge1, out Vector3 distanceCrossEdge1);
+            Vector3.Dot(ref ray.Direction, ref distanceCrossEdge1, out float triangleV);
+
+            // Make sure it is inside the triangle.
+            if(triangleV < 0 || triangleU + triangleV > 1)
+            {
+                result = null;
+                return;
+            }
+
+            // Compute the distance along the ray to the triangle
+            Vector3.Dot(ref edge2, ref distanceCrossEdge1, out float rayDistance);
+            rayDistance *= inverseDeterminant;
+
+            // Is the triangle behind the ray origin?
+            if(rayDistance < 0)
+            {
+                result = null;
+                return;
+            }
+
+            result = rayDistance;
+        }
+
+
 }
