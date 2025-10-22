@@ -188,7 +188,7 @@ namespace GUI.Editor //
         private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
         {
 
-        }
+        }//
 
         private void importToolStripMenuItem_Click(object sender, EventArgs e)
         {
