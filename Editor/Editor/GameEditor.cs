@@ -13,6 +13,8 @@ namespace Editor.Editor
     {
         internal Project Project { get; set; }
         internal Texture DefaultTexture { get; set; }
+        internal Texture2D DefaultGrass { get; set; }
+        internal Texture2D DefaultHeightMap { get; set; }
         internal Effect DefaultEffect { get; set; }
 
         private GraphicsDeviceManager m_graphics;
@@ -58,6 +60,8 @@ namespace Editor.Editor
             m_fonts = new();
             m_fonts.LoadContent(Content);
             DefaultTexture = Content.Load<Texture>("DefaultTexture");
+            DefaultGrass = Content.Load<Texture2D>("DefaultGrass");
+            DefaultHeightMap = Content.Load<Texture2D>("DefaultHeightMap");
             DefaultEffect = Content.Load<Effect>("DefaultShader");
         }
 
