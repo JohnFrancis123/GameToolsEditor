@@ -12,7 +12,7 @@ using System.IO;
 
 namespace Editor.Engine
 {
-    class Models : ISerializable, ISelectable, IMaterial
+    class Models : ISerializable, IRenderable, ISelectable
     {
         // Accessors
         public Model Mesh { get; set; }
@@ -125,21 +125,8 @@ namespace Editor.Engine
                    Matrix.CreateTranslation(Position);
         }
 
-        public void Render(Camera _camera)
+        public void Render()
         {
-            Material.Effect.Parameters["World"]?.SetValue(GetTransform());
-            Material.Effect.Parameters["WorldViewProjection"]?.SetValue(GetTransform() *
-                                                                        _camera.View *
-                                                                        _camera.Projection);
-
-            Material.Effect.Parameters["Texture"]?.SetValue(Material.Diffuse);
-            Material.Effect.Parameters["Tint"]?.SetValue(Selected);
-            Material.Effect.Parameters["CameraPosition"]?.SetValue(_camera.Position);
-            Material.Effect.Parameters["View"]?.SetValue(_camera.View);
-            Material.Effect.Parameters["Projection"]?.SetValue(_camera.Projection);
-            Material.Effect.Parameters["TextureTiling"]?.SetValue(15.0f);
-            Material.Effect.Parameters["LightDirection"]?.SetValue(Vector3.One);
-
             foreach (ModelMesh mesh in Mesh.Meshes)
             {
                 mesh.Draw();
