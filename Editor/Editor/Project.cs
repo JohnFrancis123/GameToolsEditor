@@ -10,10 +10,15 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
 {
     internal class Project : ISerializable
     {
-        public Level CurrentLevel { get; set; } = null;
-        public List<Level> Levels { get; set; } = new();
-        public string Folder { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
+        public event AssetsUpdated OnAssetsUpdated;
+        public Level CurrentLevel { get; private set; } = null;
+        public List<Level> Levels { get; private set; } = new();
+        public string Folder { get; private set; } = string.Empty;
+        public string ContentFolder { get; private set; } = string.Empty;
+        public string AssetFolder { get; private set; } = string.Empty;
+        public string ObjectFolder { get; private set; } = string.Empty;
+        public string Name { get; private set; } = string.Empty;
+        public AssetMonitor AssetMonitor { get; private set; } = null;
 
         public Project()
         {
@@ -28,8 +33,28 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
                 Name += ".oce";
             }
 
+            // Create Content folder for assets, and copy the mgcb template
+            ContentFolder = Path.Combine(Folder, "Content");
+            AssetFolder = Path.Combine(ContentFolder, "bin");
+            ObjectFolder = Path.Combine(ContentFolder, "obj");
+            char d = Path.DirectorySeparatorChar;
+            if (!Directory.Exists(ContentFolder))
+            {
+                Directory.CreateDirectory(ContentFolder);
+                Directory.CreateDirectory(AssetFolder);
+                Directory.CreateDirectory(ObjectFolder);
+                File.Copy($"ContentTemplate.mgcb", ContentFolder + $"{d}Content.mgcb");
+            }
+            AssetMonitor = new(ObjectFolder);
+            AssetMonitor.OnAssetsUpdated += AssetMon_OnAssetsUpdated;
+
             // Add a default level
             AddLevel(_device, _content);
+        }
+
+        private void AssetMon_OnAssetsUpdated()
+        {
+            OnAssetsUpdated?.Invoke();
         }
 
         public void AddLevel(GraphicsDevice _device, ContentManager _content) 

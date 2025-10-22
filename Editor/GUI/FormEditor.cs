@@ -1,10 +1,13 @@
 ﻿using Editor.Editor;
+using Editor;
 using Editor.Engine;
 using Microsoft.Xna.Framework;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace GUI.Editor //
 {
@@ -12,10 +15,12 @@ namespace GUI.Editor //
     {
         public GameEditor Game { get => m_game; set { m_game = value; HookEvents(); } }
         private GameEditor m_game = null;
+        private Process m_MGCBProcess = null;
         public FormEditor()
         {
             InitializeComponent();
             KeyPreview = true;
+            toolStripStatusLabel1.Text = Directory.GetCurrentDirectory();
         }
 
         private void HookEvents()
@@ -71,6 +76,12 @@ namespace GUI.Editor //
 
         }
 
+        private void FormEditor_FormClosing(object sender, EventArgs e)
+        {
+            if (m_MGCBProcess == null) return;
+            m_MGCBProcess.Kill();
+        }
+
         private void toolStripStatusLabel1_Click(object sender, EventArgs e)
         {
 
@@ -120,10 +131,25 @@ namespace GUI.Editor //
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 Game.Project = new(Game.GraphicsDevice, Game.Content, sfd.FileName);
+                Game.Project.OnAssetsUpdated += Project_OnAssetsUpdated;
                 Text = "Our Cool Editor - " + Game.Project.Name;
                 Game.AdjustAspectRatio();
             }
             saveToolStripMenuItem_Click(sender, e);
+        }
+
+        private void Project_OnAssetsUpdated()
+        {
+            this.Invoke(delegate
+            {
+                ListBoxAssets.Items.Clear();
+                var assets = Game.Project.AssetMonitor.Assets;
+                if (!assets.ContainsKey(AssetTypes.MODEL)) return;
+                foreach (string asset in assets[AssetTypes.MODEL])
+                {
+                    ListBoxAssets.Items.Add(asset);
+                }
+            });
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -152,6 +178,27 @@ namespace GUI.Editor //
         private void propertyGrid_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void splitContainer_Panel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void splitContainer1_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+
+        }
+
+        private void importToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string mgcbEditorPath = ConfigurationManager.AppSettings["MGCB_EditorPath"];
+            ProcessStartInfo startInfo = new()
+            {
+                FileName = "\"" + Path.Combine(mgcbEditorPath, "mgcb-editor-windows.exe") + "\"",
+                Arguments = "\"" + Path.Combine(Game.Project.ContentFolder, "Content.mgcb") + "\""
+            };
+            m_MGCBProcess = Process.Start(startInfo);
         }
     }
 }

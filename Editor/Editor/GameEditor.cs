@@ -52,7 +52,7 @@ namespace Editor.Editor
 
         protected override void LoadContent()
         {
-            m_spriteBatch = new SpriteBatch(GraphicsDevice); ;
+            m_spriteBatch = new SpriteBatch(GraphicsDevice);
             m_fonts = new();
             m_fonts.LoadContent(Content);
         }
@@ -61,6 +61,7 @@ namespace Editor.Editor
         {
             if(Project != null)
             {
+                Content.RootDirectory = Project.ContentFolder + "\\bin";
                 Project.Update((float)(_gameTime.ElapsedGameTime.TotalMilliseconds / 1000));
                 InputController.Instance.Clear();
                 var models = Project.CurrentLevel.GetSelectedModels();
