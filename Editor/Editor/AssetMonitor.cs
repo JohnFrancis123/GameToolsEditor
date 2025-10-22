@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -38,9 +39,10 @@ namespace Editor.Editor
             m_watcher.EnableRaisingEvents = true;
         }
 
-        private void UpdateAssetDB()
+        public void UpdateAssetDB()
         {
             bool updated = false;
+            AssetTypes assetType = AssetTypes.MODEL;
             using var inStream = new FileStream(m_metaInfo, FileMode.Open,
                                                 FileAccess.Read, FileShare.ReadWrite);
             using var streamReader = new StreamReader(inStream);
@@ -50,27 +52,49 @@ namespace Editor.Editor
                 if (string.IsNullOrEmpty(line)) continue;
                 string[] fields = line.Split(',');
                 if (fields[0] == "Source File") continue;
-                if (fields[2] == "\"ModelProcessor\"")
+                switch (fields[2])
                 {
-                    if (!Assets.ContainsKey(AssetTypes.MODEL)) Assets.Add(AssetTypes.MODEL, new());
-                    string assetName = Path.GetFileNameWithoutExtension(fields[1]);
-                    if (Assets[AssetTypes.MODEL].Contains(assetName)) continue;
-
-                    Assets[AssetTypes.MODEL].Add(assetName);
-                    updated = true;
+                    case "\"ModelProcessor\"":
+                        assetType = AssetTypes.MODEL;
+                        break;
+                    case "\"TextureProcessor\"":
+                        assetType = AssetTypes.TEXTURE;
+                        break;
+                    case "\"SongProcessor\"":
+                        assetType = AssetTypes.AUDIO;
+                        break;
+                    case "\"SoundEffectProcessor\"":
+                        assetType = AssetTypes.AUDIO;
+                        break;
+                    case "\"EffectProcessor\"":
+                        assetType = AssetTypes.EFFECT;
+                        break;
+                    default:
+                        Debug.Assert(false, "Unhandled processor.");
+                        break;
                 }
+                if (AddAsset(assetType, fields[1])) updated = true;
             }
 
             if (updated) OnAssetsUpdated?.Invoke();
         }
+        private bool AddAsset(AssetTypes _assetType, string _assetName)
+        {
+            if (!Assets.ContainsKey(_assetType)) Assets.Add(_assetType, new());
+            string assetName = Path.GetFileNameWithoutExtension(_assetName);
+            Assets[_assetType].Add(assetName);
+            return true;
+        }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
+            Assets.Clear();
             UpdateAssetDB();
         }
 
         private void OnCreated(object sender, FileSystemEventArgs e)
         {
+            Assets.Clear();
             UpdateAssetDB();
         }
 
