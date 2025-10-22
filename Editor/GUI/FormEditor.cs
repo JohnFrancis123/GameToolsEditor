@@ -195,8 +195,10 @@ namespace GUI.Editor //
             string mgcbEditorPath = ConfigurationManager.AppSettings["MGCB_EditorPath"];
             ProcessStartInfo startInfo = new()
             {
-                FileName = "\"" + Path.Combine(mgcbEditorPath, "mgcb-editor-windows.exe") + "\"",
-                Arguments = "\"" + Path.Combine(Game.Project.ContentFolder, "Content.mgcb") + "\""
+                //FileName = "\"" + Path.Combine(mgcbEditorPath, "mgcb-editor-windows.exe") + "\"",
+                //Arguments = "\"" + Path.Combine(Game.Project.ContentFolder, "Content.mgcb") + "\""
+                FileName = Path.Combine(mgcbEditorPath, "mgcb-editor-windows.exe"),
+                Arguments = Path.Combine(Game.Project.ContentFolder, "Content.mgcb")
             };
             m_MGCBProcess = Process.Start(startInfo);
         }
