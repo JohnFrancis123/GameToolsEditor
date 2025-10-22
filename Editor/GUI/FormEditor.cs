@@ -21,6 +21,20 @@ namespace GUI.Editor //
             InitializeComponent();
             KeyPreview = true;
             toolStripStatusLabel1.Text = Directory.GetCurrentDirectory();
+            listBoxAssets.MouseDown += ListBoxAssets_MouseDown;
+        }
+
+        private void ListBoxAssets_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (listBoxAssets.Items.Count == 0) return;
+
+            int index = listBoxAssets.IndexFromPoint(e.X, e.Y);
+            if (index < 0) return;
+            var lia = listBoxAssets.Items[index] as ListItemAsset;
+            if (lia.Type == AssetTypes.MODEL)
+            {
+                DoDragDrop(lia, DragDropEffects.Copy);
+            }
         }
 
         private void HookEvents()
@@ -32,6 +46,26 @@ namespace GUI.Editor //
             gameForm.MouseMove += GameForm_MouseMove;
             KeyDown += GameForm_KeyDown;
             KeyUp += GameForm_KeyUp;
+
+            gameForm.DragDrop += GameForm_DragDrop;
+            gameForm.DragOver += GameForm_DragOver;
+            gameForm.AllowDrop = true;
+        }
+
+        private void GameForm_DragOver(object sender, DragEventArgs e)
+        {
+            e.Effect =  DragDropEffects.Copy;
+        }
+
+        private void GameForm_DragDrop(object sender, DragEventArgs e)
+        {
+            if(e.Data.GetDataPresent(typeof(ListItemAsset)))
+            {
+                var lia = e.Data.GetData(typeof(ListItemAsset)) as ListItemAsset;
+                Models model = new(m_game, lia.Name, "DefaultTexture", 
+                                   "DefaultEffect", Vector3.Zero, 1.0f);
+                m_game.Project.CurrentLevel.AddModel(model);
+            }
         }
 
         private void GameForm_MouseUp(object Sender, MouseEventArgs e)
@@ -191,7 +225,7 @@ namespace GUI.Editor //
                 using var stream = File.Open(ofd.FileName, FileMode.Open);
                 using var reader = new BinaryReader(stream, Encoding.UTF8, false);
                 Game.Project = new();
-                Game.Project.Deserialize(reader, Game.Content);
+                Game.Project.Deserialize(reader, Game);
                 Text = "Our Cool Editor - " + Game.Project.Name;
                 Game.AdjustAspectRatio();
             }

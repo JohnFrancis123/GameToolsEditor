@@ -1,4 +1,5 @@
-﻿using Editor.Engine.Interfaces;
+﻿using Editor.Editor;
+using Editor.Engine.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,7 +10,7 @@ namespace Editor.Engine
     internal class Camera : ISerializable
     {
         public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
-        public Vector3 Target { get; set; } = new Vector3(300, 0, 0);
+        public Vector3 Target { get; set; } = new Vector3(0, 0, 0);
         public Matrix View {  get; set; } = Matrix.Identity;
         public Matrix Projection { get; set; } = Matrix.Identity;
         public float NearPlane { get; set; } = 0.1f;
@@ -30,7 +31,7 @@ namespace Editor.Engine
             View = Matrix.CreateLookAt(Position, 
                              Target, 
                              Vector3.Up);
-            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45),
+            Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90),
                                                                _aspectRatio,
                                                                NearPlane,
                                                                FarPlane);
@@ -79,7 +80,7 @@ namespace Editor.Engine
             _stream.Write(AspectRatio);
         }
 
-        public void Deserialize(BinaryReader _stream, ContentManager _content)
+        public void Deserialize(BinaryReader _stream, GameEditor _game)
         {
             Position = HelpDeserialize.Vec3(_stream);
             NearPlane = _stream.ReadSingle();
