@@ -44,5 +44,5 @@ namespace Editor.Engine
             e.Parameters["LightDirection"]?.SetValue(_object.Position - Light.Position);
             e.Parameters["LightColor"]?.SetValue(Light.Color);
         }
-    }
+    } //
 }
