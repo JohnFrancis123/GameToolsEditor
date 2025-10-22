@@ -143,19 +143,32 @@ namespace GUI.Editor //
         {
             this.Invoke(delegate
             {
-                ListBoxAssets.Items.Clear();
+                listBoxAssets.Items.Clear();
                 var assets = Game.Project.AssetMonitor.Assets;
                 if (!assets.ContainsKey(AssetTypes.MODEL)) return;
                 foreach(AssetTypes assetType in Enum.GetValues(typeof(AssetTypes)))
                 {
                     if (assets.ContainsKey(assetType))
                     {
-                        ListBoxAssets.Items.Add(assetType.ToString().ToUpper() + "S:");
+                        listBoxAssets.Items.Add(new ListItemAsset()
+                        {
+                            Name = assetType.ToString().ToUpper() + "S:",
+                            Type = AssetTypes.NONE
+                        });
                         foreach(string asset in assets[assetType])
                         {
-                            ListBoxAssets.Items.Add(asset);
+                            ListItemAsset lia = new()
+                            {
+                                Name = asset,
+                                Type = assetType
+                            };
+                            listBoxAssets.Items.Add(lia);
                         }
-                        ListBoxAssets.Items.Add(" ");
+                        listBoxAssets.Items.Add(new ListItemAsset()
+                        {
+                            Name = " ",
+                            Type = AssetTypes.NONE
+                        });
                     }
                 }
             });
