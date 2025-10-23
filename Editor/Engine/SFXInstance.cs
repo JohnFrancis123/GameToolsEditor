@@ -15,6 +15,10 @@ namespace Editor.Engine
                                            _game.Project.ContentFolder,
                                            _game.Project.AssetFolder,
                                            _assetName);
+            //fileName = fileName.Substring(fileName.IndexOf(_game.Content.RootDirectory) + _game.Content.RootDirectory.Length + 1);
+            //fileName = fileName.Substring(3);
+            fileName = _assetName;
+
             SoundEffect ef = _game.Content.Load<SoundEffect>(fileName);
             SoundEffectInstance efi = ef.CreateInstance();
             efi.Volume = 1;

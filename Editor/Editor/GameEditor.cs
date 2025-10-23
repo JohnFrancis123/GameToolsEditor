@@ -100,7 +100,7 @@ namespace Editor.Editor
         {
             if (Project != null)
             {
-                //ScriptController.Instanec.Execute("BeforeUpdateMain");
+                //ScriptController.Instance.Execute("BeforeUpdateMain");
                 Content.RootDirectory = Project.ContentFolder + "\\bin";
                 Project.Update((float)(_gameTime.ElapsedGameTime.TotalMilliseconds / 1000));
                 InputController.Instance.Clear();
