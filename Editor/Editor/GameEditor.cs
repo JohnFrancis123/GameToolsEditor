@@ -6,6 +6,7 @@ using Editor;
 using GUI.Editor;
 using System;
 using Editor.Engine;
+using Editor.GUI;
 
 namespace Editor.Editor
 {
@@ -42,7 +43,7 @@ namespace Editor.Editor
             gameForm.TopLevel = false;
             gameForm.Dock = DockStyle.Fill;
             gameForm.FormBorderStyle = FormBorderStyle.None;
-            m_parent.splitContainer.Panel1.Controls.Add(gameForm);
+            m_parent.splitContainer2.Panel2.Controls.Add(gameForm);
         }
 
         protected override void Initialize()
@@ -73,6 +74,7 @@ namespace Editor.Editor
                 if(models.Count == 0)
                 {
                     m_parent.propertyGrid.SelectedObject = null;
+                    m_parent.listBoxLevel.SelectedIndex = -1;
                 }
                 else if (models.Count > 1)
                 {
@@ -81,6 +83,14 @@ namespace Editor.Editor
                 else
                 {
                     m_parent.propertyGrid.SelectedObject = models[0];
+                    for(int count = 0; count < m_parent.listBoxLevel.Items.Count; count++)
+                    {
+                        ListItemLevel lil = m_parent.listBoxLevel.Items[count] as ListItemLevel;
+                        if(lil.Model == models[0])
+                        {
+                            m_parent.listBoxLevel.SetSelected(count, true);
+                        }
+                    }
                 }
             }
             Models.SelectedDirty = false;
@@ -90,10 +100,12 @@ namespace Editor.Editor
         {
             if (Project != null)
             {
+                //ScriptController.Instanec.Execute("BeforeUpdateMain");
                 Content.RootDirectory = Project.ContentFolder + "\\bin";
                 Project.Update((float)(_gameTime.ElapsedGameTime.TotalMilliseconds / 1000));
                 InputController.Instance.Clear();
                 UpdateSelected();
+                //ScriptController.Instanec.Execute("AfterUpdateMain");
             }
             base.Update(_gameTime);
         } //
@@ -104,6 +116,7 @@ namespace Editor.Editor
 
             if (Project != null)
             {
+                //ScriptController.Instanec.Execute("BeforeRenderMain");
                 GraphicsDevice.RasterizerState = m_rasterState;
                 GraphicsDevice.DepthStencilState = m_depthStencilState;
                 Project.Render();
@@ -111,6 +124,7 @@ namespace Editor.Editor
                 m_fonts.Draw(m_spriteBatch, 20, InputController.Instance.ToString(), new Vector2(20, 20), Color.White);
                 m_fonts.Draw(m_spriteBatch, 16, Project.CurrentLevel.ToString(), new Vector2(20, 80), Color.Yellow);
                 m_spriteBatch.End();
+                //ScriptController.Instanec.Execute("AfterRenderMain");
             }
 
             base.Draw(gameTime);

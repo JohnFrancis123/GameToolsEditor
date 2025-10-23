@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Configuration;
+using Editor.GUI;
 using System.Security.Policy;
 
 namespace GUI.Editor //
@@ -35,7 +36,7 @@ namespace GUI.Editor //
             if (index < 0) return;
             var lia = listBoxAssets.Items[index] as ListItemAsset;
             if ((lia.Type == AssetTypes.MODEL) ||
-                (lia.Type == AssetTypes.TEXTURE) || 
+                (lia.Type == AssetTypes.TEXTURE) ||
                 (lia.Type == AssetTypes.EFFECT))
             {
                 DoDragDrop(lia, DragDropEffects.Copy);
@@ -59,16 +60,19 @@ namespace GUI.Editor //
 
         private void GameForm_DragOver(object sender, DragEventArgs e)
         {
-            InputController.Instance.MousePosition = new Vector2(e.X, e.Y);
+            m_dropped = null;
+            Form gameForm = Control.FromHandle(m_game.Window.Handle) as Form;
+            var p = gameForm.PointToClient(new System.Drawing.Point(e.X, e.Y));
+            InputController.Instance.MousePosition = new Vector2(p.X, p.Y);
             e.Effect = DragDropEffects.None;
             if (e.Data.GetDataPresent(typeof(ListItemAsset)))
             {
                 var lia = e.Data.GetData(typeof(ListItemAsset)) as ListItemAsset;
-                if(lia.Type == AssetTypes.MODEL)
+                if (lia.Type == AssetTypes.MODEL)
                 {
                     e.Effect = DragDropEffects.Copy;
                 }
-                else if ((lia.Type == AssetTypes.TEXTURE) || 
+                else if ((lia.Type == AssetTypes.TEXTURE) ||
                          (lia.Type == AssetTypes.EFFECT))
                 {
                     ISelectable obj = m_game.Project.CurrentLevel.HandlePick(false);
@@ -83,7 +87,7 @@ namespace GUI.Editor //
 
         private void GameForm_DragDrop(object sender, DragEventArgs e)
         {
-            if(e.Data.GetDataPresent(typeof(ListItemAsset)))
+            if (e.Data.GetDataPresent(typeof(ListItemAsset)))
             {
                 var lia = e.Data.GetData(typeof(ListItemAsset)) as ListItemAsset;
                 if (lia.Type == AssetTypes.MODEL)
@@ -91,12 +95,13 @@ namespace GUI.Editor //
                     Models model = new(m_game, lia.Name, "DefaultTexture",
                                        "DefaultEffect", Vector3.Zero, 1.0f);
                     m_game.Project.CurrentLevel.AddModel(model);
+                    listBoxLevel.Items.Add(new ListItemLevel() { Model = model });
                 }
                 else if (lia.Type == AssetTypes.TEXTURE)
                 {
                     m_dropped?.SetTexture(m_game, lia.Name);
                 }
-                else if(lia.Type == AssetTypes.EFFECT)
+                else if (lia.Type == AssetTypes.EFFECT)
                 {
                     m_dropped?.SetShader(m_game, lia.Name);
                 }
@@ -215,7 +220,7 @@ namespace GUI.Editor //
                 listBoxAssets.Items.Clear();
                 var assets = Game.Project.AssetMonitor.Assets;
                 if (!assets.ContainsKey(AssetTypes.MODEL)) return;
-                foreach(AssetTypes assetType in Enum.GetValues(typeof(AssetTypes)))
+                foreach (AssetTypes assetType in Enum.GetValues(typeof(AssetTypes)))
                 {
                     if (assets.ContainsKey(assetType))
                     {
@@ -224,7 +229,7 @@ namespace GUI.Editor //
                             Name = assetType.ToString().ToUpper() + "S:",
                             Type = AssetTypes.NONE
                         });
-                        foreach(string asset in assets[assetType])
+                        foreach (string asset in assets[assetType])
                         {
                             ListItemAsset lia = new()
                             {
@@ -292,6 +297,17 @@ namespace GUI.Editor //
                 Arguments = Path.Combine(Game.Project.ContentFolder, "Content.mgcb")
             };
             m_MGCBProcess = Process.Start(startInfo);
+        }
+
+        private void listBoxLevel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxLevel.Items.Count == 0) return;
+
+            Game.Project.CurrentLevel.ClearSelectedModels();
+            int index = listBoxLevel.SelectedIndex;
+            if (index == -1) return;
+            var lia = listBoxLevel.Items[index] as ListItemLevel;
+            lia.Model.Selected = true;
         }
     }//
 }
