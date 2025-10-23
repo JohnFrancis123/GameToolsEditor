@@ -235,9 +235,9 @@ namespace Editor.Engine
                     m.Selected)
                 {
                     var sfi = m.SoundEffects[(int)SoundEffectTypes.OnSelect];
-                    if(sfi?.State == SoundState.Stopped)
+                    if(sfi?.Instance.State == SoundState.Stopped)
                     {
-                        sfi.Play();
+                        sfi.Instance.Play();
                     }
                 }
             }
@@ -263,6 +263,8 @@ namespace Editor.Engine
 
         public void Deserialize(BinaryReader _stream, GameEditor _game)
         {
+            //m_models.Clear(); //new. May need to remove.
+
             int modelCount = _stream.ReadInt32();
             for (int count = 0; count < modelCount; count++) 
             {

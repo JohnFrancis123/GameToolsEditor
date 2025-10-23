@@ -80,7 +80,7 @@ namespace GUI.Editor //
                 {
                     if (obj is IMaterial) m_dropped = obj as IMaterial;
                 }
-                else if(lia.Type == AssetTypes.SFX) 
+                else if (lia.Type == AssetTypes.SFX)
                 {
                     if (obj is ISoundEmitter) m_dropped = obj as ISoundEmitter;
                 }
@@ -119,7 +119,7 @@ namespace GUI.Editor //
                     ContextMenuStrip menuStrip = new();
                     var items = Enum.GetNames(typeof(SoundEffectTypes));
                     var index = 0;
-                    foreach(var i in items)
+                    foreach (var i in items)
                     {
                         ToolStripMenuItem menuItem = new(i);
                         menuItem.Click += MenuItem_Click;
@@ -139,11 +139,12 @@ namespace GUI.Editor //
             var tmi = sender as ToolStripMenuItem;
             int index = Int32.Parse(tmi.Name);
             var lia = tmi.Tag as ListItemAsset;
-            SoundEffect ef = m_game.Content.Load<SoundEffect>(lia.Name);
-            SoundEffectInstance efi = ef.CreateInstance();
-            efi.Volume = 1;
-            efi.IsLooped = false;
-            emitter.SoundEffects[index] = efi;
+            emitter.SoundEffects[index] = SFXInstance.Create(m_game, lia.Name);
+            //SoundEffect ef = m_game.Content.Load<SoundEffect>(lia.Name);
+            //SoundEffectInstance efi = ef.CreateInstance();
+            //efi.Volume = 1;
+            //efi.IsLooped = false;
+            //emitter.SoundEffects[index] = efi;
         }
 
         private void GameForm_MouseUp(object Sender, MouseEventArgs e)
@@ -244,7 +245,7 @@ namespace GUI.Editor //
             {
                 Game.Project = new(Game, sfd.FileName);
                 Game.Project.OnAssetsUpdated += Project_OnAssetsUpdated;
-                Game.Project.AssetMonitor.UpdateAssetDB();
+                //Game.Project.AssetMonitor.UpdateAssetDB();
                 Text = "Our Cool Editor - " + Game.Project.Name;
                 Game.AdjustAspectRatio();
             }
@@ -346,6 +347,33 @@ namespace GUI.Editor //
             if (index == -1) return;
             var lia = listBoxLevel.Items[index] as ListItemLevel;
             lia.Model.Selected = true;
+        }
+
+        private void createPrefabToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var models = Game.Project.CurrentLevel.GetSelectedModels();
+            if (models.Count == 0)
+            {
+                MessageBox.Show("Please select a game object in the level to convert to a prefab.",
+                                "No Game Object Selected", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            Models m = models[0] as Models;
+            string fileName = Path.Combine(Game.Project.Folder, m.Name) + ".prefab";
+            if (File.Exists(fileName)) 
+            {
+                MessageBox.Show("Prefab already exists. Tr renaming the game object or delete the existing prefab.",
+                                "Prefab Already Exists", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            using var stream = File.Open(fileName, FileMode.Create);
+            using var writer = new BinaryWriter(stream, Encoding.UTF8, false);
+            m.Serialize(writer);
+
+            ListItemPrefab item = new() { Name = m.Name + ".prefab" };
+            listBoxPrefabs.Items.Add(item);
         }
     }//
 }

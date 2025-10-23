@@ -1,11 +1,4 @@
-﻿using Microsoft.Xna.Framework.Audio;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Editor.Engine.Interfaces
+﻿namespace Editor.Engine.Interfaces
 {
     enum SoundEffectTypes
     {
@@ -14,6 +7,6 @@ namespace Editor.Engine.Interfaces
     };
     internal interface ISoundEmitter
     {
-        public SoundEffectInstance[] SoundEffects { get; }
+        public SFXInstance[] SoundEffects { get; }
     }
 }

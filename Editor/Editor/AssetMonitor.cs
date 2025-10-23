@@ -43,6 +43,7 @@ namespace Editor.Editor
 
         public void UpdateAssetDB()
         {
+
             bool updated = false;
             AssetTypes assetType = AssetTypes.MODEL;
             using var inStream = new FileStream(m_metaInfo, FileMode.Open,

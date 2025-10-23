@@ -88,6 +88,8 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
 
         public void Deserialize(BinaryReader _stream, GameEditor _game)
         {
+            //Levels.Clear(); //new. May need to remove.
+
             int levelCount = _stream.ReadInt32();
             for(int count = 0; count < levelCount; count++)
             {
