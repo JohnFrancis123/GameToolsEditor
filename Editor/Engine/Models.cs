@@ -56,13 +56,13 @@ namespace Editor.Engine
         public void Create(GameEditor _game, string _model, string _texture, string _effect, Vector3 _position, float _scale) 
         {
             string fileName = Path.Combine(_game.Project.Folder, _game.Project.ContentFolder,
-                                           _game.Project.AssetFolder, _model);               
+                                        _game.Project.AssetFolder, _model);               
             Mesh = _game.Content.Load<Model>(fileName);
             Mesh.Tag = _model;
             Name = _model;
             Material = new Material();
             SetTexture(_game, _texture);
-            SetShader(_game, _effect);
+            SetShader(_game, _effect); //
             m_position = _position;
             Scale = _scale;
             //if SoundEffects is null, we create the new instance. That's what ??= means.
