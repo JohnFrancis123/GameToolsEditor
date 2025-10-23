@@ -56,7 +56,10 @@ namespace Editor.Engine
         public void Create(GameEditor _game, string _model, string _texture, string _effect, Vector3 _position, float _scale) 
         {
             string fileName = Path.Combine(_game.Project.Folder, _game.Project.ContentFolder,
-                                        _game.Project.AssetFolder, _model);               
+                                        _game.Project.AssetFolder, _model);
+            //I needed to add this in because the lab code was not working. The absolute path includes the C drive, which messes with it.
+            fileName = fileName.Substring(fileName.IndexOf(_game.Content.RootDirectory) + _game.Content.RootDirectory.Length + 1);
+
             Mesh = _game.Content.Load<Model>(fileName);
             Mesh.Tag = _model;
             Name = _model;
@@ -91,6 +94,8 @@ namespace Editor.Engine
             {
                 string fileName = Path.Combine(_game.Project.Folder, _game.Project.ContentFolder,
                                            _game.Project.AssetFolder, _texture);
+                //I needed to add this in because the lab code was not working. The absolute path includes the C drive, which messes with it.
+                fileName = fileName.Substring(fileName.IndexOf(_game.Content.RootDirectory) + _game.Content.RootDirectory.Length + 1);
                 Material.Diffuse = _game.Content.Load<Texture>(fileName);
             }
             Material.Diffuse.Tag = _texture;
@@ -106,6 +111,8 @@ namespace Editor.Engine
             {
                 string fileName = Path.Combine(_game.Project.Folder, _game.Project.ContentFolder,
                                            _game.Project.AssetFolder, _shader);
+                //I needed to add this in because the lab code was not working. The absolute path includes the C drive, which messes with it.
+                fileName = fileName.Substring(fileName.IndexOf(_game.Content.RootDirectory) + _game.Content.RootDirectory.Length + 1);
                 Material.Effect = _game.Content.Load<Effect>(fileName);
             }
             Material.Effect.Tag = _shader;
