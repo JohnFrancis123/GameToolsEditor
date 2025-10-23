@@ -6,17 +6,20 @@
 using Editor.Editor;
 using Editor.Engine.Interfaces;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.IO;
 
 namespace Editor.Engine
 {
-    class Models : ISerializable, IRenderable, ISelectable
+    class Models : ISerializable, IRenderable, ISelectable, ISoundEmitter
     {
         // Accessors
         public Model Mesh { get; set; }
         public Material Material { get; private set; }
+        public SoundEffectInstance[] SoundEffects { get; private set; }
         public Texture Texture { get; set; }
         public Effect Shader { get; set; } 
         public Vector3 Position { get => m_position; set { m_position = value; } }
@@ -60,6 +63,7 @@ namespace Editor.Engine
             SetShader(_game, _effect);
             m_position = _position;
             Scale = _scale;
+            SoundEffects = new SoundEffectInstance[Enum.GetNames(typeof(SoundEffectTypes)).Length];
         }
 
         public void SetShader(Effect _effect)

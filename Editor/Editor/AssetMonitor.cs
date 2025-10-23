@@ -17,7 +17,8 @@ namespace Editor.Editor
         TEXTURE,
         FONT,
         AUDIO,
-        EFFECT
+        EFFECT,
+        SFX
     };
 
     internal class AssetMonitor
@@ -64,11 +65,11 @@ namespace Editor.Editor
                     case "\"SongProcessor\"":
                         assetType = AssetTypes.AUDIO;
                         break;
-                    case "\"SoundEffectProcessor\"":
-                        assetType = AssetTypes.AUDIO;
-                        break;
                     case "\"EffectProcessor\"":
                         assetType = AssetTypes.EFFECT;
+                        break;
+                    case "\"SoundEffectProcessor\"":
+                        assetType = AssetTypes.SFX;
                         break;
                     default:
                         Debug.Assert(false, "Unhandled processor.");

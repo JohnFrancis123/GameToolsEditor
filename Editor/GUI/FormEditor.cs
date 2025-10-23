@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Configuration;
 using Editor.GUI;
 using System.Security.Policy;
+using Microsoft.Xna.Framework.Audio;
 
 namespace GUI.Editor //
 {
@@ -19,7 +20,7 @@ namespace GUI.Editor //
         public GameEditor Game { get => m_game; set { m_game = value; HookEvents(); } }
         private GameEditor m_game = null;
         private Process m_MGCBProcess = null;
-        private IMaterial m_dropped = null;
+        private Object m_dropped = null;
         public FormEditor()
         {
             InitializeComponent();
@@ -37,6 +38,7 @@ namespace GUI.Editor //
             var lia = listBoxAssets.Items[index] as ListItemAsset;
             if ((lia.Type == AssetTypes.MODEL) ||
                 (lia.Type == AssetTypes.TEXTURE) ||
+                (lia.Type == AssetTypes.SFX) ||
                 (lia.Type == AssetTypes.EFFECT))
             {
                 DoDragDrop(lia, DragDropEffects.Copy);
@@ -68,6 +70,7 @@ namespace GUI.Editor //
             if (e.Data.GetDataPresent(typeof(ListItemAsset)))
             {
                 var lia = e.Data.GetData(typeof(ListItemAsset)) as ListItemAsset;
+                ISelectable obj = m_game.Project.CurrentLevel.HandlePick(false);
                 if (lia.Type == AssetTypes.MODEL)
                 {
                     e.Effect = DragDropEffects.Copy;
@@ -75,12 +78,15 @@ namespace GUI.Editor //
                 else if ((lia.Type == AssetTypes.TEXTURE) ||
                          (lia.Type == AssetTypes.EFFECT))
                 {
-                    ISelectable obj = m_game.Project.CurrentLevel.HandlePick(false);
                     if (obj is IMaterial) m_dropped = obj as IMaterial;
-                    if (m_dropped != null)
-                    {
-                        e.Effect = DragDropEffects.Copy;
-                    }
+                }
+                else if(lia.Type == AssetTypes.SFX) 
+                {
+                    if (obj is ISoundEmitter) m_dropped = obj as ISoundEmitter;
+                }
+                if (m_dropped != null)
+                {
+                    e.Effect = DragDropEffects.Copy;
                 }
             }
         }
@@ -99,13 +105,45 @@ namespace GUI.Editor //
                 }
                 else if (lia.Type == AssetTypes.TEXTURE)
                 {
-                    m_dropped?.SetTexture(m_game, lia.Name);
+                    IMaterial material = m_dropped as IMaterial;
+                    material?.SetTexture(m_game, lia.Name);
                 }
                 else if (lia.Type == AssetTypes.EFFECT)
                 {
-                    m_dropped?.SetShader(m_game, lia.Name);
+                    IMaterial material = m_dropped as IMaterial;
+                    material?.SetShader(m_game, lia.Name);
+                }
+                else if (lia.Type == AssetTypes.SFX)
+                {
+                    ISoundEmitter emitter = (ISoundEmitter)m_dropped;
+                    ContextMenuStrip menuStrip = new();
+                    var items = Enum.GetNames(typeof(SoundEffectTypes));
+                    var index = 0;
+                    foreach(var i in items)
+                    {
+                        ToolStripMenuItem menuItem = new(i);
+                        menuItem.Click += MenuItem_Click;
+                        menuItem.Name = index.ToString();
+                        menuItem.Tag = lia;
+                        menuStrip.Items.Add(menuItem);
+                        index++;
+                    }
+                    menuStrip.Show(new System.Drawing.Point(e.X, e.Y));
                 }
             }
+        }
+
+        private void MenuItem_Click(object sender, EventArgs e)
+        {
+            ISoundEmitter emitter = (ISoundEmitter)m_dropped;
+            var tmi = sender as ToolStripMenuItem;
+            int index = Int32.Parse(tmi.Name);
+            var lia = tmi.Tag as ListItemAsset;
+            SoundEffect ef = m_game.Content.Load<SoundEffect>(lia.Name);
+            SoundEffectInstance efi = ef.CreateInstance();
+            efi.Volume = 1;
+            efi.IsLooped = false;
+            emitter.SoundEffects[index] = efi;
         }
 
         private void GameForm_MouseUp(object Sender, MouseEventArgs e)
