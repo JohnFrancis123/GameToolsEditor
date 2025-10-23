@@ -12,6 +12,7 @@ using System.Configuration;
 using Editor.GUI;
 using System.Security.Policy;
 using Microsoft.Xna.Framework.Audio;
+using System.Collections.Generic;
 
 namespace GUI.Editor //
 {
@@ -27,6 +28,17 @@ namespace GUI.Editor //
             KeyPreview = true;
             toolStripStatusLabel1.Text = Directory.GetCurrentDirectory();
             listBoxAssets.MouseDown += ListBoxAssets_MouseDown;
+            listBoxPrefabs.MouseDown += ListBoxPrefabs_MouseDown;
+        }
+
+        private void ListBoxPrefabs_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (listBoxPrefabs.Items.Count == 0) return;
+            int index = listBoxPrefabs.IndexFromPoint(e.X, e.Y);
+            if (index < 0) return;
+            var lip = listBoxPrefabs.Items[index] as ListItemPrefab;
+
+            DoDragDrop(lip, DragDropEffects.Copy);
         }
 
         private void ListBoxAssets_MouseDown(object sender, MouseEventArgs e)
@@ -89,6 +101,10 @@ namespace GUI.Editor //
                     e.Effect = DragDropEffects.Copy;
                 }
             }
+            else if (e.Data.GetDataPresent(typeof(ListItemPrefab)))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
         }
 
         private void GameForm_DragDrop(object sender, DragEventArgs e)
@@ -130,6 +146,17 @@ namespace GUI.Editor //
                     }
                     menuStrip.Show(new System.Drawing.Point(e.X, e.Y));
                 }
+            }
+            else if (e.Data.GetDataPresent(typeof(ListItemPrefab)))
+            {
+                var lip = e.Data.GetData(typeof(ListItemPrefab)) as ListItemPrefab;
+                string fileName = Path.Combine(Game.Project.Folder, lip.Name);
+                using var stream = File.Open(fileName, FileMode.Open);
+                using var reader = new BinaryReader(stream, Encoding.UTF8, false);
+                Models m = new Models();
+                m.Deserialize(reader, m_game);
+                m_game.Project.CurrentLevel?.AddModel(m);
+                listBoxLevel.Items.Add(new ListItemLevel() { Model = m });
             }
         }
 
@@ -246,6 +273,8 @@ namespace GUI.Editor //
                 Game.Project = new(Game, sfd.FileName);
                 Game.Project.OnAssetsUpdated += Project_OnAssetsUpdated;
                 Game.Project.AssetMonitor.UpdateAssetDB();
+                UpdatePrefabsList();
+                UpdateModelsList();
                 Text = "Our Cool Editor - " + Game.Project.Name;
                 Game.AdjustAspectRatio();
             }
@@ -305,8 +334,34 @@ namespace GUI.Editor //
                 using var reader = new BinaryReader(stream, Encoding.UTF8, false);
                 Game.Project = new();
                 Game.Project.Deserialize(reader, Game);
+                Game.Project.OnAssetsUpdated += Project_OnAssetsUpdated;
+                Game.Project.AssetMonitor.UpdateAssetDB();
+                UpdatePrefabsList();
+                UpdateModelsList();
                 Text = "Our Cool Editor - " + Game.Project.Name;
                 Game.AdjustAspectRatio();
+            }
+        }
+
+        private void UpdateModelsList()
+        {
+            listBoxLevel.Items.Clear();
+            List<Models> models = Game.Project.CurrentLevel.GetModelsList();
+            foreach (Models model in models)
+            {
+                listBoxLevel.Items.Add(new ListItemLevel() { Model = model });
+            }
+        }
+
+        private void UpdatePrefabsList()
+        {
+            listBoxPrefabs.Items.Clear();
+            string[] prefabs = Directory.GetFiles(Game.Project.Folder, "*.prefab");
+            foreach (string prefab in prefabs)
+            {
+                string fileName = Path.GetFileName(prefab);
+                ListItemPrefab item = new() { Name = fileName };
+                listBoxPrefabs.Items.Add(item);
             }
         }
 
@@ -330,10 +385,12 @@ namespace GUI.Editor //
             string mgcbEditorPath = ConfigurationManager.AppSettings["MGCB_EditorPath"];
             ProcessStartInfo startInfo = new()
             {
-                //FileName = "\"" + Path.Combine(mgcbEditorPath, "mgcb-editor-windows.exe") + "\"",
-                //Arguments = "\"" + Path.Combine(Game.Project.ContentFolder, "Content.mgcb") + "\""
-                FileName = Path.Combine(mgcbEditorPath, "mgcb-editor-windows.exe"),
-                Arguments = Path.Combine(Game.Project.ContentFolder, "Content.mgcb")
+
+                //FileName = Path.Combine(mgcbEditorPath, "mgcb-editor-windows.exe"),
+                //Arguments = Path.Combine(Game.Project.ContentFolder, "Content.mgcb")
+
+                FileName = "\"" + Path.Combine(mgcbEditorPath, "mgcb-editor-windows.exe") + "\"",
+                Arguments = "\"" + Path.Combine(Game.Project.ContentFolder, "Content.mgcb") + "\""
             };
             m_MGCBProcess = Process.Start(startInfo);
         }

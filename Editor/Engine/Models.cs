@@ -55,7 +55,9 @@ namespace Editor.Engine
 
         public void Create(GameEditor _game, string _model, string _texture, string _effect, Vector3 _position, float _scale) 
         {
-            Mesh = _game.Content.Load<Model>(_model);
+            string fileName = Path.Combine(_game.Project.Folder, _game.Project.ContentFolder,
+                                           _game.Project.AssetFolder, _model);               
+            Mesh = _game.Content.Load<Model>(fileName);
             Mesh.Tag = _model;
             Name = _model;
             Material = new Material();
@@ -87,22 +89,26 @@ namespace Editor.Engine
             }
             else
             {
-                Material.Diffuse = _game.Content.Load<Texture>(_texture);
+                string fileName = Path.Combine(_game.Project.Folder, _game.Project.ContentFolder,
+                                           _game.Project.AssetFolder, _texture);
+                Material.Diffuse = _game.Content.Load<Texture>(fileName);
             }
             Material.Diffuse.Tag = _texture;
         }
 
-        public void SetShader(GameEditor _game, string _effect)
+        public void SetShader(GameEditor _game, string _shader)
         {
-            if (_effect == "DefaultEffect")
+            if (_shader == "DefaultEffect")
             {
                 Material.Effect = _game.DefaultEffect;
             }
             else
             {
-                Material.Effect = _game.Content.Load<Effect>(_effect);
+                string fileName = Path.Combine(_game.Project.Folder, _game.Project.ContentFolder,
+                                           _game.Project.AssetFolder, _shader);
+                Material.Effect = _game.Content.Load<Effect>(fileName);
             }
-            Material.Effect.Tag = _effect;
+            Material.Effect.Tag = _shader;
             SetShader(Material.Effect);
         }
 

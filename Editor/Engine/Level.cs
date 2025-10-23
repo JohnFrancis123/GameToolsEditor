@@ -16,6 +16,11 @@ namespace Editor.Engine
         // Accessors
         public Camera GetCamera() { return m_camera; }
 
+        public List<Models> GetModelsList()
+        {
+            return m_models;
+        }
+
         // Members
         private List<Models> m_models = new();
         private Camera m_camera = new(new Vector3(0.1f, 354.0f, 541.0f), 16.0f / 9.0f); //my resolution is 16x10
