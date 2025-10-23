@@ -245,7 +245,7 @@ namespace GUI.Editor //
             {
                 Game.Project = new(Game, sfd.FileName);
                 Game.Project.OnAssetsUpdated += Project_OnAssetsUpdated;
-                //Game.Project.AssetMonitor.UpdateAssetDB();
+                Game.Project.AssetMonitor.UpdateAssetDB();
                 Text = "Our Cool Editor - " + Game.Project.Name;
                 Game.AdjustAspectRatio();
             }
