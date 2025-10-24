@@ -29,6 +29,7 @@ namespace Editor.Editor
         {
             m_graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            //Content.RootDirectory = Project.ContentFolder + "\\bin";
             IsMouseVisible = true;
             m_rasterState = new RasterizerState();
             m_rasterState.CullMode = CullMode.None;

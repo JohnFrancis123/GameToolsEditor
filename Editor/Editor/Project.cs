@@ -30,7 +30,7 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
             Name = Path.GetFileName(_name);
             if (!Name.ToLower().EndsWith(".oce"))
             {
-                Name += ".oce";
+                Name += ".oce"; //
             }
 
             // Create Content folder for assets, and copy the mgcb template
