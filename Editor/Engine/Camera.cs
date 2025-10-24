@@ -28,14 +28,23 @@ namespace Editor.Engine
         {
             Position = _position;
             AspectRatio = _aspectRatio;
-            View = Matrix.CreateLookAt(Position, 
-                             Target, 
-                             Vector3.Up);
+            View = Matrix.CreateLookAt(Position, Target, Vector3.Up);
             Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90),
-                                                               _aspectRatio,
+                                                               AspectRatio,
                                                                NearPlane,
                                                                FarPlane);
         }
+
+        public void UpdatePosition(float _x, float _y, float _z)
+        {
+            Update(Position + new Vector3(_x, _y, _z), AspectRatio);
+        }
+
+        public void UpdateRotation(float _y)
+        {
+            Rotate(new Vector3(0, _y, 0));
+        }
+
         public void Translate(Vector3 _translate)
         {
             float distance = Vector3.Distance(Target, Position);

@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Windows.Forms;
 using Editor;
+using Editor.Engine.Scripting;
 using GUI.Editor;
 using System;
 using Editor.Engine;
@@ -101,12 +102,12 @@ namespace Editor.Editor
         {
             if (Project != null)
             {
-                //ScriptController.Instance.Execute("BeforeUpdateMain");
+                ScriptController.Instance.Execute("BeforeUpdateMain");
                 Content.RootDirectory = Project.ContentFolder + "\\bin";
                 Project.Update((float)(_gameTime.ElapsedGameTime.TotalMilliseconds / 1000));
                 InputController.Instance.Clear();
                 UpdateSelected();
-                //ScriptController.Instanec.Execute("AfterUpdateMain");
+                ScriptController.Instance.Execute("AfterUpdateMain");
             }
             base.Update(_gameTime);
         } //
@@ -117,7 +118,7 @@ namespace Editor.Editor
 
             if (Project != null)
             {
-                //ScriptController.Instanec.Execute("BeforeRenderMain");
+                ScriptController.Instance.Execute("BeforeRenderMain");
                 GraphicsDevice.RasterizerState = m_rasterState;
                 GraphicsDevice.DepthStencilState = m_depthStencilState;
                 Project.Render();
@@ -125,7 +126,7 @@ namespace Editor.Editor
                 m_fonts.Draw(m_spriteBatch, 20, InputController.Instance.ToString(), new Vector2(20, 20), Color.White);
                 m_fonts.Draw(m_spriteBatch, 16, Project.CurrentLevel.ToString(), new Vector2(20, 80), Color.Yellow);
                 m_spriteBatch.End();
-                //ScriptController.Instanec.Execute("AfterRenderMain");
+                ScriptController.Instance.Execute("AfterRenderMain");
             }
 
             base.Draw(gameTime);

@@ -15,6 +15,8 @@ namespace Editor.Engine
     { //beginning lab 4
         // Accessors
         public Camera GetCamera() { return m_camera; }
+        public Terrain GetTerrain() { return m_terrain; }
+        public Light GetLight() { return m_light; }
 
         public List<Models> GetModelsList()
         {
@@ -38,8 +40,8 @@ namespace Editor.Engine
 
         public void LoadContent(GameEditor _game)
         {
-            //m_terrain = new(_game.DefaultEffect, _game.DefaultHeightMap,
-            //                _game.DefaultGrass, 200, _game.GraphicsDevice);
+            m_terrain = new(_game.DefaultEffect, _game.DefaultHeightMap,
+                            _game.DefaultGrass, 200, _game.GraphicsDevice);
         }
 
         public void LoadContent(GraphicsDevice _device, ContentManager _content)
