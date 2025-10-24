@@ -23,6 +23,7 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
         public string ScriptFolder { get; private set; } = string.Empty;
         public string Name { get; private set; } = string.Empty;
         public AssetMonitor AssetMonitor { get; private set; } = null;
+        public ScriptMonitor ScriptMonitor { get; private set; } = null;
 
         public Project()
         {
@@ -62,12 +63,17 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
                 CreateScriptFile(ScriptFolder + $"{d}AfterUpdate.lua");
             AssetMonitor = new(ObjectFolder);
             AssetMonitor.OnAssetsUpdated += AssetMon_OnAssetsUpdated;
-
+            ScriptMonitor = new(ScriptFolder);
+            ScriptMonitor.OnScriptUpdated += ScriptMon_OnScriptUpdated;
             // Add a default level
             AddLevel(_game);
             ConfigureScripts();
         }
 
+        private void ScriptMon_OnScriptUpdated(string _script)
+        {
+            ScriptController.Instance.LoadScriptFile(_script);
+        }
         private void AssetMon_OnAssetsUpdated()
         {
             OnAssetsUpdated?.Invoke();
