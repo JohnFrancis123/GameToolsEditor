@@ -43,7 +43,10 @@ namespace Editor.Engine
             {
                 if (model.Selected) models.Add(model);
             }
-            if (m_terrain.Selected) models.Add(m_terrain);
+            if (m_terrain != null)
+            {
+                if (m_terrain.Selected) models.Add(m_terrain);
+            }
             return models;
         }
         public void Render()
@@ -52,6 +55,7 @@ namespace Editor.Engine
             {
                 m.Render(m_camera.View, m_camera.Projection);
             }
+            if(m_terrain != null)
             m_terrain.Draw(m_terrainEffect, m_camera.View, m_camera.Projection);
         }
 

@@ -76,7 +76,7 @@ namespace GUI.Editor //
 
         }
 
-        private void FormEditor_FormClosing(object sender, EventArgs e)
+        private void FormEditor_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (m_MGCBProcess == null) return;
             m_MGCBProcess.Kill();
