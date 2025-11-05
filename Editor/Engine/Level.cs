@@ -54,6 +54,8 @@ namespace Editor.Engine
             {
                 if (model.Selected) models.Add(model);
             }
+
+            //could be the terrain effect
             if(m_terrain != null)
             {
                 if (m_terrain.Selected) models.Add(m_terrain);
