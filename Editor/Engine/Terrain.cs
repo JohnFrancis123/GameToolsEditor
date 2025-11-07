@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Editor.Engine
 {
-    internal class Terrain : ISelectable, IRenderable
+    internal class Terrain : ISelectable, IMaterial 
     {
         public VertexPositionNormalTexture[] Vertices { get; set; } // Vertex array
         public VertexBuffer VertexBuffer { get; set; } // Vertex Buffer//
