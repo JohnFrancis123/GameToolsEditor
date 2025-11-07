@@ -8,7 +8,7 @@ namespace Editor.Engine
     internal class Terrain : ISelectable, IRenderable
     {
         public VertexPositionNormalTexture[] Vertices { get; set; } // Vertex array
-        public VertexBuffer VertexBuffer { get; set; } // Vertex Buffer
+        public VertexBuffer VertexBuffer { get; set; } // Vertex Buffer//
         public int[] Indices { get; set; } // Index array
         public IndexBuffer IndexBuffer { get; set; } // Index buffer
         public float[,] Heights { get; set; } // Array of vertex heights
