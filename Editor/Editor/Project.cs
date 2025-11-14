@@ -98,6 +98,7 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
             ContentFolder = _stream.ReadString();
             AssetFolder = _stream.ReadString();
             ObjectFolder = _stream.ReadString();
+            _game.Content.RootDirectory = AssetFolder; // this fixed all the serialization errors
 
             int levelCount = _stream.ReadInt32();
             for(int count = 0; count < levelCount; count++)

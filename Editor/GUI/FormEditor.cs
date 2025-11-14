@@ -82,7 +82,7 @@ namespace GUI.Editor //
             if (e.Data.GetDataPresent(typeof(ListItemAsset)))
             {
                 var lia = e.Data.GetData(typeof(ListItemAsset)) as ListItemAsset;
-                ISelectable obj = m_game.Project.CurrentLevel.HandlePick(false);
+                ISelectable obj = m_game.Project.CurrentLevel.HandlePick(false); //I remove this?
                 if (lia.Type == AssetTypes.MODEL)
                 {
                     e.Effect = DragDropEffects.Copy;
@@ -138,7 +138,7 @@ namespace GUI.Editor //
                     foreach (var i in items)
                     {
                         ToolStripMenuItem menuItem = new(i);
-                        menuItem.Click += MenuItem_Click;
+                        menuItem.Click += MenuItem_Click; //our event handler to subscribe to the evenet
                         menuItem.Name = index.ToString();
                         menuItem.Tag = lia;
                         menuStrip.Items.Add(menuItem);
