@@ -16,7 +16,7 @@ namespace Editor.Engine
         public int Length { get; set; } // Number of vertices on z axis
         public int Height { get; set; } // Terrain height factor
         public int VertexCount { get; set; } // Number of vertices
-        public ushort IndexCount { get; set; } // Number of indices
+        public int IndexCount { get; set; } // Number of indices
         public GraphicsDevice Device { get; set; } // The graphics device for rendering
         public Vector3 LightDirection { get; set; } // Direction light is emanating from
         public Texture2D HeightMap { get; set; } // Heightmap texture
