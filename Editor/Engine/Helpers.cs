@@ -114,22 +114,58 @@ namespace Editor.Engine
             result = rayDistance;
         }
 
-        public static float? PickTriangle(in Terrain _terrain, ref Ray _ray, ref Matrix _transform)
+        //public static float? PickTriangle(in Terrain _terrain, ref Ray _ray, ref Matrix _transform)
+        //{
+        //    Vector3 pos1 = new(); Vector3 pos2 = new(); Vector3 pos3 = new();
+
+        //    for (int i = 0; i < _terrain.Indices.Length; i += 3)
+        //    {
+        //        int index = _terrain.Indices[i];
+        //        pos1 = _terrain.Vertices[index].Position;
+        //        Vector3.Transform(ref pos1, ref _transform, out pos1);
+
+        //        index = _terrain.Indices[i + 1];
+        //        pos2 = _terrain.Vertices[index].Position;
+        //        Vector3.Transform(ref pos2, ref _transform, out pos2);
+
+        //        index = _terrain.Indices[i + 2];
+        //        pos3 = _terrain.Vertices[index].Position;
+        //        Vector3.Transform(ref pos3, ref _transform, out pos3);
+
+        //        RayIntersectsTriangle(ref _ray, ref pos1, ref pos2, ref pos3, out float? res);
+        //        if (res.HasValue)
+        //        {
+        //            return res;
+        //        }
+        //    }
+
+        //    return null;
+        //}
+
+        public static float? PickTriangle(in Terrain _terrain, ref Ray _ray, ref Matrix _transform) //post-optimization fix
         {
             Vector3 pos1 = new(); Vector3 pos2 = new(); Vector3 pos3 = new();
 
-            for (int i = 0; i < _terrain.Indices.Length; i += 3)
+            // Choose index source
+            bool use16 = _terrain.Indices16 != null;
+            var indices16 = _terrain.Indices16;
+            var indices32 = _terrain.Indices32;
+
+            int indexCount = _terrain.IndexCount;
+
+            for (int i = 0; i < indexCount; i += 3)
             {
-                int index = _terrain.Indices[i];
-                pos1 = _terrain.Vertices[index].Position;
+                int i0 = use16 ? indices16[i] : indices32[i];
+                int i1 = use16 ? indices16[i + 1] : indices32[i + 1];
+                int i2 = use16 ? indices16[i + 2] : indices32[i + 2];
+
+                pos1 = _terrain.Positions[i0];
                 Vector3.Transform(ref pos1, ref _transform, out pos1);
 
-                index = _terrain.Indices[i + 1];
-                pos2 = _terrain.Vertices[index].Position;
+                pos2 = _terrain.Positions[i1];
                 Vector3.Transform(ref pos2, ref _transform, out pos2);
 
-                index = _terrain.Indices[i + 2];
-                pos3 = _terrain.Vertices[index].Position;
+                pos3 = _terrain.Positions[i2];
                 Vector3.Transform(ref pos3, ref _transform, out pos3);
 
                 RayIntersectsTriangle(ref _ray, ref pos1, ref pos2, ref pos3, out float? res);
@@ -141,6 +177,8 @@ namespace Editor.Engine
 
             return null;
         }
+
+
 
         [ThreadStatic]
         private static short[] CachedIndices;

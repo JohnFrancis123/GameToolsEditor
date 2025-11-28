@@ -7,11 +7,18 @@ namespace Editor.Engine
 {
     internal class Terrain : ISelectable, IRenderable
     {
+        private float[] Heights; //post-optimization 1D array of vertex heights
         public VertexPositionNormalTexture[] Vertices { get; set; } // Vertex array
         public VertexBuffer VertexBuffer { get; set; } // Vertex Buffer
-        public int[] Indices { get; set; } // Index array
+
+        public Vector3[] Positions { get; set; } //post optimization vertex positions array
+        public ushort[] Indices16 { get; set; } //post-optimization 16 bit Index array
+        public int[] Indices32 { get; set; } //post-optimization 32 bit Index array
+
+
+        //public int[] Indices { get; set; } // Index array
         public IndexBuffer IndexBuffer { get; set; } // Index buffer
-        public float[,] Heights { get; set; } // Array of vertex heights
+        //public float[,] Heights { get; set; } // Array of vertex heights
         public int Width { get; set; } // Number of vertices on x axis
         public int Length { get; set; } // Number of vertices on z axis
         public int Height { get; set; } // Terrain height factor
@@ -32,26 +39,45 @@ namespace Editor.Engine
         {
             Material = new Material();
             HeightMap = _heightMap;
+            BaseTexture = _baseTexture;
             Material.Diffuse = _baseTexture;
             Material.Effect = _effect;
-            BaseTexture = _baseTexture;
+
             Device = _device;
             Width = _heightMap.Width;
             Length = _heightMap.Height;
             Height = _height;
             LightDirection = new Vector3(0, 1, 1);
-            // 1 vertex per pixel
+
             VertexCount = Width * Length;
-            // (Width - 1) * (Length - 1) cells, 2 triangles per cell, 3 indices per triangle
             IndexCount = (Width - 1) * (Length - 1) * 6;
 
             GetHeights();
-            CreateVertices();
+            CreateVerticesPositions(); //post-optimization combined method
             CreateIndices();
             GenNormals();
 
-            VertexBuffer.SetData<VertexPositionNormalTexture>(Vertices);
-            IndexBuffer.SetData<int>(Indices);
+            // Upload vertices
+            VertexBuffer = new VertexBuffer(Device, typeof(VertexPositionNormalTexture), VertexCount, BufferUsage.WriteOnly);
+            VertexBuffer.SetData(Vertices);
+
+            //IndexBuffer = new IndexBuffer(Device, IndexElementSize.SixteenBits, IndexCount, BufferUsage.WriteOnly);
+
+            //upload indices (choose size)
+            if (Indices16 != null)
+            {
+                IndexBuffer = new IndexBuffer(Device, IndexElementSize.SixteenBits, IndexCount, BufferUsage.WriteOnly);
+                IndexBuffer.SetData(Indices16);
+            }
+            else
+            {
+                IndexBuffer = new IndexBuffer(Device, IndexElementSize.ThirtyTwoBits, IndexCount, BufferUsage.WriteOnly);
+                IndexBuffer.SetData(Indices32);
+            }
+
+            // Release heavy CPU copies no longer needed (retain Positions + indices for picking)
+            Vertices = null;
+            Heights = null;
         }
 
         public Matrix GetTransform()
@@ -61,96 +87,238 @@ namespace Editor.Engine
                    Matrix.CreateTranslation(Position);
         }
 
+        //private void GetHeights()
+        //{
+        //    // Extract pixel data
+        //    Color[] heightMapData = new Color[HeightMap.Width * HeightMap.Height];
+        //    HeightMap.GetData<Color>(heightMapData);
+        //    // Create heights[,] array
+        //    Heights = new float[Width, Length];
+        //    // For each pixel
+        //    for (int y = 0; y < Length; y++)
+        //    {
+        //        for (int x = 0; x < Width; x++)
+        //        {
+        //            // Get color value (0 - 255)
+        //            float amt = heightMapData[y * Width + x].R;
+        //            // Scale(0 - 1)
+        //            amt /= 255.0f;
+        //            // Multiply by max height to get final height
+        //            Heights[x, y] = amt * Height;
+        //        }
+        //    }
+        //}
         private void GetHeights()
         {
-            // Extract pixel data
             Color[] heightMapData = new Color[HeightMap.Width * HeightMap.Height];
-            HeightMap.GetData<Color>(heightMapData);
-            // Create heights[,] array
-            Heights = new float[Width, Length];
-            // For each pixel
+            HeightMap.GetData(heightMapData);
+
+            Heights = new float[VertexCount];
             for (int y = 0; y < Length; y++)
             {
+                int rowOffset = y * Width;
                 for (int x = 0; x < Width; x++)
                 {
-                    // Get color value (0 - 255)
-                    float amt = heightMapData[y * Width + x].R;
-                    // Scale(0 - 1)
-                    amt /= 255.0f;
-                    // Multiply by max height to get final height
-                    Heights[x, y] = amt * Height;
+                    float amt = heightMapData[rowOffset + x].R / 255.0f;
+                    Heights[rowOffset + x] = amt * Height;
                 }
             }
         }
 
-        private void CreateVertices()
+        private float GetHeight(int x, int y)
         {
-            VertexBuffer = new VertexBuffer(Device, typeof(VertexPositionNormalTexture),
-                                            VertexCount, BufferUsage.WriteOnly);
+            return Heights[y * Width + x];
+        }
 
+
+        //private void CreateVertices()
+        //{
+        //    VertexBuffer = new VertexBuffer(Device, typeof(VertexPositionNormalTexture),
+        //                                    VertexCount, BufferUsage.WriteOnly);
+
+        //    Vertices = new VertexPositionNormalTexture[VertexCount];
+        //    for (int y = 0; y < Length; y++)
+        //    {
+        //        for (int x = 0; x < Width; x++)
+        //        {
+        //            int index = y * Width + x;
+        //            Vertices[index] = new VertexPositionNormalTexture();
+        //            Vertices[index].Position = new Vector3(x, Heights[x, y], y);
+        //            Vertices[index].Normal = new Vector3(0, 0, 0);
+        //            Vertices[index].TextureCoordinate = new Vector2((float)x / Width, (float)y / Length);
+        //        }
+        //    }
+        //}
+
+        private void CreateVerticesPositions() //post-optimization combined method
+        {
             Vertices = new VertexPositionNormalTexture[VertexCount];
-            for(int y = 0; y < Length; y++)
+            Positions = new Vector3[VertexCount];
+
+            for (int y = 0; y < Length; y++)
             {
-                for(int x = 0;x < Width; x++)
+                int rowOffset = y * Width;
+                float v = (float)y / (Length - 1);
+                for (int x = 0; x < Width; x++)
                 {
-                    int index = y * Width + x;
-                    Vertices[index] = new VertexPositionNormalTexture();
-                    Vertices[index].Position = new Vector3(x, Heights[x, y], y);
-                    Vertices[index].Normal = new Vector3(0, 0, 0);
-                    Vertices[index].TextureCoordinate = new Vector2((float)x / Width, (float)y / Length);
+                    int index = rowOffset + x;
+                    float u = (float)x / (Width - 1);
+                    Vector3 pos = new Vector3(x, GetHeight(x, y), y);
+                    Vertices[index] = new VertexPositionNormalTexture(pos, Vector3.Zero, new Vector2(u, v));
+                    Positions[index] = pos;
                 }
             }
         }
 
-        private void CreateIndices()
-        {
-            IndexBuffer = new IndexBuffer(Device, IndexElementSize.ThirtyTwoBits,
-                                          IndexCount, BufferUsage.WriteOnly);
+        //private void CreateIndices()
+        //{
+        //    IndexBuffer = new IndexBuffer(Device, IndexElementSize.ThirtyTwoBits,
+        //                                  IndexCount, BufferUsage.WriteOnly);
 
-            Indices = new int[IndexCount];
+        //    Indices = new int[IndexCount];
+        //    int i = 0;
+        //    // For each cell
+        //    for (int y = 0; y < Length - 1; y++)
+        //    {
+        //        for (int x = 0; x < Width - 1; x++)
+        //        {
+        //            // Find the indices of the corners
+        //            int upperLeft = y * Width + x;
+        //            int upperRight = upperLeft + 1;
+        //            int lowerLeft = upperLeft + Width;
+        //            int lowerRight = lowerLeft + 1;
+        //            // Specify upper triangle
+        //            Indices[i++] = upperLeft;
+        //            Indices[i++] = upperRight;
+        //            Indices[i++] = lowerLeft;
+        //            // Specify the lwoer triangle
+        //            Indices[i++] = lowerLeft;
+        //            Indices[i++] = upperRight;
+        //            Indices[i++] = lowerRight;
+        //        }
+        //    }
+        //}
+
+
+        private void CreateIndices() //post-optimization method supporting 16 and 32 bit indices
+        {
+            bool use16 = VertexCount <= 65535;
+            if (use16)
+            {
+                Indices16 = new ushort[IndexCount];
+            }
+            else
+            {
+                Indices32 = new int[IndexCount];
+            }
+
             int i = 0;
-            // For each cell
-            for (int y = 0; y < Length - 1; y++) {
+            for (int y = 0; y < Length - 1; y++)
+            {
+                int row = y * Width;
+                int nextRow = (y + 1) * Width;
                 for (int x = 0; x < Width - 1; x++)
                 {
-                    // Find the indices of the corners
-                    int upperLeft = y * Width + x;
+                    int upperLeft = row + x;
                     int upperRight = upperLeft + 1;
-                    int lowerLeft = upperLeft + Width;
+                    int lowerLeft = nextRow + x;
                     int lowerRight = lowerLeft + 1;
-                    // Specify upper triangle
-                    Indices[i++] = upperLeft;
-                    Indices[i++] = upperRight;
-                    Indices[i++] = lowerLeft;
-                    // Specify the lwoer triangle
-                    Indices[i++] = lowerLeft;
-                    Indices[i++] = upperRight;
-                    Indices[i++] = lowerRight;
+
+                    if (Indices16 != null)
+                    {
+                        Indices16[i++] = (ushort)upperLeft;
+                        Indices16[i++] = (ushort)upperRight;
+                        Indices16[i++] = (ushort)lowerLeft;
+                        Indices16[i++] = (ushort)lowerLeft;
+                        Indices16[i++] = (ushort)upperRight;
+                        Indices16[i++] = (ushort)lowerRight;
+                    }
+                    else
+                    {
+                        Indices32[i++] = upperLeft;
+                        Indices32[i++] = upperRight;
+                        Indices32[i++] = lowerLeft;
+                        Indices32[i++] = lowerLeft;
+                        Indices32[i++] = upperRight;
+                        Indices32[i++] = lowerRight;
+                    }
                 }
             }
         }
+
+
+
+        //private void GenNormals()
+        //{
+        //    // For each triangle
+        //    for (int i = 0; i < IndexCount; i += 3)
+        //    {
+        //        // Find the position fo each corenr of the triangle
+        //        Vector3 v1 = Vertices[Indices[i]].Position;
+        //        Vector3 v2 = Vertices[Indices[i + 1]].Position;
+        //        Vector3 v3 = Vertices[Indices[i + 2]].Position;
+        //        // Cross the vvectors between the corners to get the normal
+        //        Vector3 normal = Vector3.Cross(v1 - v3, v1 - v2);
+        //        normal.Normalize();
+        //        // Add the influence of the normal to each vertex in the triangle
+        //        Vertices[Indices[i]].Normal += normal;
+        //        Vertices[Indices[i + 1]].Normal += normal;
+        //        Vertices[Indices[i + 2]].Normal += normal;
+        //    }
+        //    // Average the influences of the triangles touching each vertex
+        //    for (int i = 0; i < VertexCount; i++)
+        //    {
+        //        Vertices[i].Normal.Normalize();
+        //    }
+        //}
 
         private void GenNormals()
         {
-            // For each triangle
-            for(int i = 0; i < IndexCount; i += 3)
+            // Accumulate normals per vertex using the original triangle indices
+            if (Indices16 != null)
             {
-                // Find the position fo each corenr of the triangle
-                Vector3 v1 = Vertices[Indices[i]].Position;
-                Vector3 v2 = Vertices[Indices[i + 1]].Position;
-                Vector3 v3 = Vertices[Indices[i + 2]].Position;
-                // Cross the vvectors between the corners to get the normal
-                Vector3 normal = Vector3.Cross(v1 - v3, v1 - v2);
-                normal.Normalize();
-                // Add the influence of the normal to each vertex in the triangle
-                Vertices[Indices[i]].Normal += normal;
-                Vertices[Indices[i + 1]].Normal += normal;
-                Vertices[Indices[i + 2]].Normal += normal;
+                for (int i = 0; i < IndexCount; i += 3)
+                {
+                    int i0 = Indices16[i];
+                    int i1 = Indices16[i + 1];
+                    int i2 = Indices16[i + 2];
+
+                    Vector3 v1 = Vertices[i0].Position;
+                    Vector3 v2 = Vertices[i1].Position;
+                    Vector3 v3 = Vertices[i2].Position;
+
+                    Vector3 normal = Vector3.Cross(v1 - v3, v1 - v2);
+                    normal.Normalize();
+
+                    Vertices[i0].Normal += normal;
+                    Vertices[i1].Normal += normal;
+                    Vertices[i2].Normal += normal;
+                }
             }
-            // Average the influences of the triangles touching each vertex
-            for(int i = 0; i < VertexCount; i++)
+            else
             {
-                Vertices[i].Normal.Normalize();
+                for (int i = 0; i < IndexCount; i += 3)
+                {
+                    int i0 = Indices32[i];
+                    int i1 = Indices32[i + 1];
+                    int i2 = Indices32[i + 2];
+
+                    Vector3 v1 = Vertices[i0].Position;
+                    Vector3 v2 = Vertices[i1].Position;
+                    Vector3 v3 = Vertices[i2].Position;
+
+                    Vector3 normal = Vector3.Cross(v1 - v3, v1 - v2);
+                    normal.Normalize();
+
+                    Vertices[i0].Normal += normal;
+                    Vertices[i1].Normal += normal;
+                    Vertices[i2].Normal += normal;
+                }
+            }
+
+            for (int v = 0; v < VertexCount; v++)
+            {
+                Vertices[v].Normal.Normalize();
             }
         }
 
@@ -187,7 +355,7 @@ namespace Editor.Engine
 
         public void SetTexture(GameEditor _game, string _texture)
         {
-            if(_texture == "DefaultTexture")
+            if (_texture == "DefaultTexture")
             {
                 Material.Diffuse = _game.DefaultTexture;
             }
@@ -200,7 +368,7 @@ namespace Editor.Engine
 
         public void SetShader(GameEditor _game, string _effect)
         {
-            if(_effect == "DefaultEffect")
+            if (_effect == "DefaultEffect")
             {
                 Material.Effect = _game.DefaultEffect;
             }
