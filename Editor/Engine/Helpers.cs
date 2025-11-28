@@ -1,6 +1,10 @@
-﻿using System.IO;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Editor.Engine
 {
@@ -138,6 +142,14 @@ namespace Editor.Engine
             return null;
         }
 
+        [ThreadStatic]
+        private static short[] CachedIndices;
+        [ThreadStatic]
+        private static float[] CachedVertices;
+
+        // ... GetPickRay and RayIntersectsTriangle methods remain the same ...
+
+        // The method in question:
         public static float? PickTriangle(in ModelMesh _mesh, ref Ray _ray, ref Matrix _transform)
         {
             Vector3 pos1 = new(); Vector3 pos2 = new(); Vector3 pos3 = new();
@@ -145,24 +157,44 @@ namespace Editor.Engine
             foreach (var part in _mesh.MeshParts)
             {
                 int stride = part.VertexBuffer.VertexDeclaration.VertexStride / 4;
-                var indices = new short[part.IndexBuffer.IndexCount];
-                part.IndexBuffer.GetData<short>(indices);
-                var vertices = new float[part.VertexBuffer.VertexCount * stride];
-                part.VertexBuffer.GetData<float>(vertices);
 
-                // Usually, the first three floats are position
+                // 1. Manage Index Buffer
+                int indexCount = part.IndexBuffer.IndexCount;
+                if (CachedIndices == null || CachedIndices.Length < indexCount)
+                {
+                    // Allocate a new array only if the existing one is too small.
+                    CachedIndices = new short[indexCount];
+                }
+                // Use GetData with the cached buffer (up to indexCount elements)
+                part.IndexBuffer.GetData<short>(0, CachedIndices, 0, indexCount);
+
+                // 2. Manage Vertex Buffer
+                int vertexFloatCount = part.VertexBuffer.VertexCount * stride;
+                if (CachedVertices == null || CachedVertices.Length < vertexFloatCount)
+                {
+                    // Allocate a new array only if the existing one is too small.
+                    CachedVertices = new float[vertexFloatCount];
+                }
+                // Use GetData with the cached buffer (up to vertexFloatCount elements)
+                part.VertexBuffer.GetData<float>(0, CachedVertices, 0, vertexFloatCount);
+
+                // Now, use CachedIndices and CachedVertices instead of the old local variables.
+                // The rest of the logic is unchanged.
                 for (int i = part.StartIndex; i < part.StartIndex + part.PrimitiveCount * 3; i += 3)
                 {
-                    int index = (part.VertexOffset + indices[i]) * stride;
-                    pos1.X = vertices[index]; pos1.Y = vertices[index + 1]; pos1.Z = vertices[index + 2];
+                    // The indices array is now CachedIndices
+                    int index = (part.VertexOffset + CachedIndices[i]) * stride;
+
+                    // The vertices array is now CachedVertices
+                    pos1.X = CachedVertices[index]; pos1.Y = CachedVertices[index + 1]; pos1.Z = CachedVertices[index + 2];
                     Vector3.Transform(ref pos1, ref _transform, out pos1);
 
-                    index = (part.VertexOffset + indices[i + 1]) * stride;
-                    pos2.X = vertices[index]; pos2.Y = vertices[index + 1]; pos2.Z = vertices[index + 2];
+                    index = (part.VertexOffset + CachedIndices[i + 1]) * stride;
+                    pos2.X = CachedVertices[index]; pos2.Y = CachedVertices[index + 1]; pos2.Z = CachedVertices[index + 2];
                     Vector3.Transform(ref pos2, ref _transform, out pos2);
 
-                    index = (part.VertexOffset + indices[i + 2]) * stride;
-                    pos3.X = vertices[index]; pos3.Y = vertices[index + 1]; pos3.Z = vertices[index + 2];
+                    index = (part.VertexOffset + CachedIndices[i + 2]) * stride;
+                    pos3.X = CachedVertices[index]; pos3.Y = CachedVertices[index + 1]; pos3.Z = CachedVertices[index + 2];
                     Vector3.Transform(ref pos3, ref _transform, out pos3);
 
                     RayIntersectsTriangle(ref _ray, ref pos1, ref pos2, ref pos3, out float? res);

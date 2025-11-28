@@ -42,7 +42,7 @@ namespace Editor.Editor //unsure if Editor.Editor should be the namespace we use
             ContentFolder = Path.Combine(Folder, "Content");
             AssetFolder = Path.Combine(ContentFolder, "bin");
             ObjectFolder = Path.Combine(ContentFolder, "obj");
-            ScriptFolder = Path.Combine(Folder, "Scripts");
+            ScriptFolder = Path.Combine(Folder, "Scripts"); //could be project folder / scripts or content folder / scripts
             
             char d = Path.DirectorySeparatorChar;
             if (!Directory.Exists(ContentFolder))

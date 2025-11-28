@@ -144,6 +144,14 @@ namespace GUI.Editor //
                         menuStrip.Items.Add(menuItem);
                         index++;
                     }
+
+                    // Dispose after dropdown closes; avoid touching Items while closing
+                    menuStrip.Closed += (s, _) =>
+                    {
+                        // schedule disposal after the close completes
+                        BeginInvoke((Action)(() => menuStrip.Dispose()));
+                    };
+
                     menuStrip.Show(new System.Drawing.Point(e.X, e.Y));
                 }
             }
