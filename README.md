@@ -1,42 +1,42 @@
-# 🎮 GameToolsEditor
+# GameToolsEditor
 
 A powerful 3D game level editor built with MonoGame and Windows Forms, featuring terrain editing, model management, scripting support, and real-time rendering capabilities.
 
-## ✨ Features
+## Features
 
-### 🌄 Terrain System
+### Terrain System
 - **Height-map based terrain generation** - Create realistic landscapes using height map textures
 - **Real-time terrain rendering** - Visualize terrain changes instantly with optimized rendering
 - **Texture mapping** - Apply grass and other textures to terrain surfaces
 - **Customizable terrain parameters** - Control terrain size, scale, and appearance
 
-### 🎨 Asset Management
+### Asset Management
 - **Drag-and-drop asset import** - Easily import models, textures, and audio files
 - **Asset monitoring** - Automatic detection and reloading of modified assets
 - **Content pipeline integration** - Built-in MonoGame Content Pipeline (MGCB) support
 - **Organized asset structure** - Automatic organization into Content folders
 
-### 🎯 3D Editing Tools
+### 3D Editing Tools
 - **3D model placement** - Position and manipulate 3D models in your scene
 - **Camera controls** - Intuitive camera navigation for scene exploration
 - **Level management** - Create and manage multiple game levels
 - **Prefab system** - Create reusable game object templates
 
-### 💡 Lighting System
+### Lighting System
 - **Dynamic lighting** - Configurable light sources with position and color control
 - **Shader support** - Custom HLSL shaders for advanced rendering effects
 - **Material system** - Define and apply materials to objects
 
-### 🔧 Scripting Support
+### Scripting Support
 - **Lua scripting integration** - Powered by MoonSharp for game logic
 - **Script monitoring** - Automatic reload of modified scripts during development
 - **Script controller** - Manage and execute scripts within the editor
 
-### 🎵 Audio Features
+### Audio Features
 - **Sound emitter system** - Place and configure audio sources in your levels
 - **SFX management** - Import and manage sound effects
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Framework**: [MonoGame 3.8](https://www.monogame.net/) (DirectX)
 - **.NET**: .NET 8.0 (Windows)
@@ -45,14 +45,14 @@ A powerful 3D game level editor built with MonoGame and Windows Forms, featuring
 - **Graphics**: DirectX with custom HLSL shaders
 - **Language**: C#
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Windows OS (Windows 10 or later recommended)
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or later
 - Visual Studio 2022 or later (optional, but recommended)
 - DirectX runtime
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Installation
 
@@ -129,7 +129,7 @@ A powerful 3D game level editor built with MonoGame and Windows Forms, featuring
 2. Add sound emitters to objects in your scene
 3. Configure audio properties (volume, pitch, etc.)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 GameToolsEditor/
@@ -163,7 +163,7 @@ GameToolsEditor/
 └── Editor.sln                  # Visual Studio solution
 ```
 
-## 🎯 Key Components
+## Key Components
 
 ### GameEditor
 The main game class that inherits from MonoGame's `Game` class. Handles:
@@ -194,7 +194,7 @@ Height-map based terrain system featuring:
 - Optimized rendering with culling
 - Custom shader integration
 
-## 🎨 Shader Development
+## Shader Development
 
 The editor supports custom HLSL shaders located in the `Content/` folder:
 
@@ -205,16 +205,6 @@ The editor supports custom HLSL shaders located in the `Content/` folder:
 
 Shaders can be edited in Visual Studio or any text editor and will be compiled automatically by the MonoGame Content Pipeline.
 
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** to the branch (`git push origin feature/AmazingFeature`)
-5. **Open** a Pull Request
-
 ### Development Guidelines
 
 - Follow C# coding conventions
@@ -222,13 +212,13 @@ Contributions are welcome! Here's how you can help:
 - Test your changes thoroughly
 - Update documentation as needed
 
-## 🐛 Known Issues
+## Known Issues
 
 - The editor is Windows-only due to Windows Forms dependency
 - Some features may require DirectX runtime
 - Large terrain meshes may impact performance
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 - [ ] Cross-platform support (Avalonia UI or similar)
 - [ ] Undo/Redo system
@@ -239,23 +229,23 @@ Contributions are welcome! Here's how you can help:
 - [ ] Animation timeline
 - [ ] Multi-user collaboration
 
-## 📝 License
+## License
 
 This project is available as open source. Please check the repository for specific license information.
 
-## 👤 Author
+## Author
 
 **JohnFrancis123**
 
 - GitHub: [@JohnFrancis123](https://github.com/JohnFrancis123)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [MonoGame](https://www.monogame.net/) - Open-source game framework
 - [MoonSharp](https://www.moonsharp.org/) - Lua scripting for .NET
 - The game development community
 
-## 📞 Support
+## Support
 
 If you have questions or need help:
 
@@ -265,6 +255,6 @@ If you have questions or need help:
 
 ---
 
-**⭐ If you find this project useful, please consider giving it a star!**
+* If you find this project useful, please consider giving it a star!**
 
-*Built with ❤️ using MonoGame and C#*
+*Built using MonoGame and C#*
